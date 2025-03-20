@@ -2,18 +2,19 @@ import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createNavigationContainerRef } from "@react-navigation/native";
-import HomeScreen from "../screens/HomeScreen";
-import MangaDetailsScreen from "../screens/MangaDetailsScreen";
-import MangaChapterScreen from "../screens/MangaChapterScreen";
-import SearchScreen from "../screens/SearchScreen";
-import HistoryScreen from "../screens/HistoryScreen";
-import SettingsScreen from "../screens/SettingsScreen";
+import HomeScreen from "../screens/HomeScreen/HomeScreen";
+import MangaDetailsScreen from "../screens/MangaDetailsScreen/MangaDetailsScreen";
+import MangaChapterScreen from "../screens/MangaReaderScreen/MangaReaderScreen";
+import SearchScreen from "../screens/SearchScreen/SearchScreen";
+import HistoryScreen from "../screens/HistoryScreen/HistoryScreen";
+import SettingsScreen from "../screens/SettingsScreen/SettingsScreen";
 import { Theme } from "../theme/Theme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BackHandler } from "react-native";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
-const ref = createNavigationContainerRef();
+const navigationRef = createNavigationContainerRef();
 const MyTheme = {
     ...DefaultTheme,
     colors: {
@@ -22,53 +23,54 @@ const MyTheme = {
     }
 };
 
-function RootTabs(props) {
-
-    const hideTabBarHome = props.routeName !== 'HomeScreen';
-    const options = {
-        backgroundColor: Theme.colors.charcoalBlack,
-        borderTopWidth: 0,
-        elevation: 0,
-    }
+function RootTabs(props: any) {
+    const screensWithTabBar = ['HomeScreen', 'SearchScreen', 'Historial', 'SettingScreen']
+    const hideTabBar = !screensWithTabBar.includes(props.routeName);
 
     return (
         <Tab.Navigator
-            initialRouteName="HomeTab"
+            initialRouteName="Inicio"
+            backBehavior="none"
             screenOptions={{
                 tabBarStyle: {
                     backgroundColor: Theme.colors.gunmetalGray,
                     borderTopWidth: 0,
                     elevation: 0,
+                    display: hideTabBar ? "none" : "flex",
                 },
                 tabBarActiveTintColor: Theme.colors.vermillion,
                 tabBarHideOnKeyboard: true,
+                tabBarVisibilityAnimationConfig: {
+                    show: {
+                        animation: 'timing',
+                        config: {
+                            duration: 500,
+                            isInteraction: true,
+                        }
+                    }
+                },
                 headerShown: false,
-                animation: 'fade',
+                // animation: 'fade',
             }}>
             <Tab.Screen
-                name='HomeTab'
+                name='Inicio'
                 component={HomeStack}
-                options={{
-                    tabBarStyle: {
-                        ...options,
-                        display: hideTabBarHome ? "none" : "flex",
-                    },
-                }}>
+                >
             </Tab.Screen>
             <Tab.Screen
-                name='SearchTab'
-                component={SearchScreen}
+                name='Buscar'
+                component={SearchStack}
                 options={{
                 }}>
             </Tab.Screen>
             <Tab.Screen
-                name='HistoryTab'
+                name='Historial'
                 component={HistoryScreen}
                 options={{
                 }}>
             </Tab.Screen>
             <Tab.Screen
-                name='SettingsTab'
+                name='Configuración'
                 component={SettingStack}
                 options={{
                 }}>
@@ -82,11 +84,7 @@ function HomeStack() {
         <Stack.Navigator
             initialRouteName="HomeScreen"
             screenOptions={{
-                headerStyle: {
-                    backgroundColor: Theme.colors.gunmetalGray
-                },
-                headerTintColor: Theme.colors.lightGray,
-                headerShadowVisible: false,
+                headerShown: false,
                 orientation: 'default',
             }}>
             <Stack.Screen
@@ -94,8 +92,46 @@ function HomeStack() {
                 component={HomeScreen}
             />
             <Stack.Screen
+                name="MangaDetailsStack"
+                component={MangaDetailsStack}
+            />
+        </Stack.Navigator>
+    );
+};
+
+function SearchStack() {
+    return (
+        <Stack.Navigator
+            initialRouteName="SearchScreen"
+            screenOptions={{
+                headerShown: false,
+                orientation: 'default',
+            }}
+        >
+            <Stack.Screen
+                name="SearchScreen"
+                component={SearchScreen}
+            />
+            <Stack.Screen
+                name="MangaDetailsStack"
+                component={MangaDetailsStack}
+            />
+        </Stack.Navigator>
+    );
+}
+
+function MangaDetailsStack({ route }: any) {
+    return (
+        <Stack.Navigator
+            initialRouteName="MangaDetailsScreen"
+            screenOptions={{
+                headerShown: false,
+                orientation: 'default',
+            }}>
+            <Stack.Screen
                 name="MangaDetailsScreen"
                 component={MangaDetailsScreen}
+                initialParams={route?.params}
             />
             <Stack.Screen
                 name="MangaChapterScreen"
@@ -103,11 +139,16 @@ function HomeStack() {
             />
         </Stack.Navigator>
     );
-};
+}
 
 function SettingStack() {
     return (
-        <Stack.Navigator initialRouteName="SettingScreen">
+        <Stack.Navigator
+            initialRouteName="SettingScreen"
+            screenOptions={{
+                headerShown: false,
+                orientation: 'default',
+            }}>
             <Stack.Screen
                 name="SettingScreen"
                 component={SettingsScreen}
@@ -122,12 +163,12 @@ export default function Navigation() {
 
     return (
         <NavigationContainer
-            ref={ref}
+            ref={navigationRef}
             onReady={() => {
-                setRouteName(ref.getCurrentRoute().name)
+                setRouteName(navigationRef.getCurrentRoute().name)
             }}
             onStateChange={async () => {
-                const currentRouteName = ref.getCurrentRoute().name;
+                const currentRouteName = navigationRef.getCurrentRoute().name;
                 setRouteName(currentRouteName);
             }}
             theme={MyTheme}>
