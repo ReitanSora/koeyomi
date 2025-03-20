@@ -118,7 +118,7 @@ function SearchStack() {
             />
         </Stack.Navigator>
     );
-}
+};
 
 function MangaDetailsStack({ route }: any) {
     return (
@@ -139,7 +139,7 @@ function MangaDetailsStack({ route }: any) {
             />
         </Stack.Navigator>
     );
-}
+};
 
 function SettingStack() {
     return (
