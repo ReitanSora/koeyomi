@@ -28,9 +28,14 @@ export const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
     },
+    title:{
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     titleText: {
         fontSize: Theme.fonts.subtitle,
         fontWeight: 'bold',
+        lineHeight: Theme.fonts.subtitle + 1, // delete this in case of bug in accordion title Text
         color: Theme.colors.midGray,
     },
     icon: {},
