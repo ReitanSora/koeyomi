@@ -3,6 +3,16 @@ import { Theme } from "../../theme/Theme";
 import { MAX_HEIGHT, MAX_WIDTH } from "../../constants/Constants";
 
 export const styles = StyleSheet.create({
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: MAX_HEIGHT - 55,
+    },
+    loadingText: {
+        color: Theme.colors.midGray,
+        fontSize: Theme.fonts.paragraph,
+    },
     mangaContainer:{
         width: '100%',
         flex: 1,
@@ -99,8 +109,52 @@ export const styles = StyleSheet.create({
         width: '100%',
         paddingHorizontal: 10,
     },
-    mangaChapters:{
-        // backgroundColor: '#F2F2F2',
+    //Language Selector
+    languageSelector:{
+        marginVertical: 10,
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 20,
+    },
+    languageItem:{
+        paddingHorizontal: 5,
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+
+        borderBottomWidth: 1,
+        borderColor: Theme.colors.midGray,
+    },
+    languageText:{
+        fontSize: Theme.fonts.paragraph,
+        color: Theme.colors.midGray,
+    },
+    
+    //Manga Footer
+    mangaFooter:{
+        width: MAX_WIDTH,
+        height: 70,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    mangaLoader:{
+        backgroundColor: Theme.colors.gunmetalGray,
+        paddingVertical: 3,
+        paddingHorizontal: 20,
         margin: 10,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+        
+        borderRadius: 20,
+    },
+    mangaLoaderText:{
+        fontSize: Theme.fonts.tiny,
+        color: Theme.colors.midGray,
     },
 })
