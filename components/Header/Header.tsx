@@ -13,7 +13,6 @@ interface HeaderProps {
     handleFilter?: (text: any) => void;
     handleSearch?: () => void;
     inputValue?: any;
-    // setInputValue?: Dispatch<SetStateAction<any>>;
     handleClose?: () => void;
     handleChangeText?: (text: string) => void;
 }
