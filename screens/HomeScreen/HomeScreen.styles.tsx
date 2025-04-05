@@ -49,8 +49,10 @@ export const styles = StyleSheet.create({
         alignSelf: 'center',
     },
     mangaItemFooter: {
+        position: 'absolute',
         bottom: 0,
-        backgroundColor: Theme.colors.midGray,
+        width: '100%',
+        backgroundColor: 'rgba(54,54,54,0.8)',
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 10,
