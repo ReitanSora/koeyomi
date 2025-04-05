@@ -4,6 +4,7 @@ export const Theme = {
         lightWhite: '#F5F5F5',
         black: '#121212',
         vermillion: '#FF4500',
+        softVermillion: 'rgba(255,69,0,0.3)',
         charcoalBlack: '#1E1E1E',
         gunmetalGray: '#252525',
         jetgray: '#363636',
