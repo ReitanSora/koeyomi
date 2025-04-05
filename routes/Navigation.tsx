@@ -4,13 +4,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createNavigationContainerRef } from "@react-navigation/native";
 import HomeScreen from "../screens/HomeScreen/HomeScreen";
 import MangaDetailsScreen from "../screens/MangaDetailsScreen/MangaDetailsScreen";
-import MangaChapterScreen from "../screens/MangaReaderScreen/MangaReaderScreen";
+import MangaReaderScreen from "../screens/MangaReaderScreen/MangaReaderScreen";
 import SearchScreen from "../screens/SearchScreen/SearchScreen";
 import HistoryScreen from "../screens/HistoryScreen/HistoryScreen";
 import SettingsScreen from "../screens/SettingsScreen/SettingsScreen";
 import { Theme } from "../theme/Theme";
-import { useEffect, useState } from "react";
-import { BackHandler } from "react-native";
+import { useState } from "react";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -55,7 +54,7 @@ function RootTabs(props: any) {
             <Tab.Screen
                 name='Inicio'
                 component={HomeStack}
-                >
+            >
             </Tab.Screen>
             <Tab.Screen
                 name='Buscar'
@@ -134,8 +133,9 @@ function MangaDetailsStack({ route }: any) {
                 initialParams={route?.params}
             />
             <Stack.Screen
-                name="MangaChapterScreen"
-                component={MangaChapterScreen}
+                name="MangaReaderScreen"
+                component={MangaReaderScreen}
+                initialParams={route?.params}
             />
         </Stack.Navigator>
     );
