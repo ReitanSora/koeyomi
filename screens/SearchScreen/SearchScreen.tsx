@@ -1,11 +1,9 @@
-import { View, Text, TouchableNativeFeedback, TextInput, useWindowDimensions, BackHandler, FlatList } from 'react-native';
+import { View, Text, TouchableNativeFeedback, FlatList } from 'react-native';
 import { styles } from './SearchScreen.style';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { useEffect, useRef, useState } from 'react';
 import { Theme } from '../../theme/Theme';
-import { Entypo, FontAwesome5 } from '@expo/vector-icons';
-import Animated, { FadeInRight } from 'react-native-reanimated';
+import { Entypo } from '@expo/vector-icons';
 import Header from '../../components/Header/Header';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
@@ -23,7 +21,7 @@ export default function SearchScreen() {
     const handleSearch = async () => {
         if (searchTitle.trim().length > 0) {
             try {
-                const response = await fetcher('http://192.168.1.9:4040',`/mangadex/search?title=${encodeURIComponent(searchTitle)}`) as object;
+                const response = await fetcher(process.env.EXPO_PUBLIC_KOEYOMI_BACKEND,`/mangadex/search?title=${encodeURIComponent(searchTitle)}`) as object;
                 setSearchResults(response);
             } catch (error) {
                 console.log('Error searching:', error)
