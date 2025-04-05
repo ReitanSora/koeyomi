@@ -14,7 +14,23 @@ export const styles = StyleSheet.create({
     },
     headerLeft: {
         flex: 1,
-        alignItems: 'flex-start'
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        gap: 10,
+    },
+    headerText:{
+        maxWidth: '90%',
+        flexDirection: 'column',
+    },
+    headerTextTitle: {
+        fontSize: Theme.fonts.title,
+        fontWeight: 'bold',
+        color: Theme.colors.lightGray,
+    },
+    headerTextSubtitle:{
+        fontSize: Theme.fonts.paragraph,
+        color: Theme.colors.midGray,
     },
     headerRight: {
         flex: 1,
