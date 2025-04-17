@@ -1,4 +1,4 @@
-import { Text, TouchableNativeFeedback, View } from "react-native";
+import { Text, ToastAndroid, TouchableNativeFeedback, View } from "react-native";
 import { styles } from "./ChapterItem.styles";
 import { Ionicons } from "@expo/vector-icons";
 import { Theme } from "../../theme/Theme";
@@ -23,27 +23,12 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
     const author = item.relationships.find((item: ChapterItemInterface) => item.type === 'scanlation_group')
     const navigation = useNavigation();
 
-    const [downloadProgress, setDownloadProgress] = useState(0);
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
     const [isDownloaded, setIsDownloaded] = useState<boolean>(item.download_status === 'not_downloaded' ? false : true);
-    const [isPaused, setIsPaused] = useState<boolean>();
 
     const db = useSQLiteContext();
 
     const rotation = useSharedValue(0);
-
-    const orderSavedImages = (array: string[]) => {
-        array.sort((a, b) => {
-            const numberA = parseInt(a.split('-')[0]);
-            const numberB = parseInt(b.split('-')[0]);
-
-            return numberA - numberB;
-        });
-
-        return array;
-    }
-
-
 
     const handleDownload = async () => {
         try {
@@ -57,7 +42,7 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
                 await FileSystem.makeDirectoryAsync(downloadDirectory, { intermediates: true });
             }
 
-            const promises = await Promise.all(
+            await Promise.all(
                 images.chapter.dataSaver.map(
                     image => FileSystem.downloadAsync(
                         `${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${images.chapter.hash}/${image}`,
@@ -66,16 +51,13 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
                 )
             )
 
-            console.log(promises[0])
-            // await saveFilesToDevice(promises);
-
             setIsDownloaded(true);
             setIsDownloading(false);
             db.withTransactionAsync(async () => {
                 await updateChapterInfo(true, downloadDirectory);
             })
         } catch (error) {
-            Toast({ message: `Error while downloading chapter: ${error}` })
+            Toast({ message: `Error while downloading chapter: ${error}`, duration: ToastAndroid.SHORT })
             db.withTransactionAsync(async () => {
                 await updateChapterInfo(false, '');
             })
