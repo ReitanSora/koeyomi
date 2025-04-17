@@ -19,11 +19,12 @@ export const fetcher = async <T>(
         const response = await fetch(`${base_url}${endpoint}`, options);
 
         if (!response.ok) {
-            let errorData
+            const errorText = await response.text();
+            let errorData;
             try {
-                errorData = await response.json();
+                errorData = JSON.parse(errorText);
             } catch {
-                errorData = { message: await response.text() };
+                errorData = { message: errorText };
             }
             throw new Error(errorData.message || 'Request error');
         }
