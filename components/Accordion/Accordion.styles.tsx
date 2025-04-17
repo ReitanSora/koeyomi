@@ -4,11 +4,10 @@ import { Theme } from "../../theme/Theme"
 export const styles = StyleSheet.create({
     accordion: {
         width: '100%',
-        minHeight: 50,
-        // maxHeight: 150,
         backgroundColor: Theme.colors.jetgray,
-        padding: 10,
-
+        
+        alignItems: 'center',
+        justifyContent: 'center',
         overflow: 'hidden',
 
         // borderWidth: 1,
@@ -16,13 +15,16 @@ export const styles = StyleSheet.create({
         borderRadius: Theme.borders.cardItem,
     },
     accordionTrigger: {
-        height: 30,
+        height: 50,
 
         alignItems: 'center',
         justifyContent: 'center',
+        overflow: 'hidden',
     },
     triggerContent: {
         width: '100%',
+        height: '100%',
+        padding: 10,
 
         flexDirection: 'row',
         alignItems: 'center',
@@ -44,7 +46,7 @@ export const styles = StyleSheet.create({
     description: {
     },
     descriptionText: {
-        paddingTop: 10,
+        padding: 10,
 
         fontSize: Theme.fonts.paragraph,
         color: Theme.colors.midGray,

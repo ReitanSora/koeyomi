@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, Text, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native'
 import Animated, { LinearTransition, SlideInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Theme } from '../../theme/Theme';
 import { styles } from './Accordion.styles';
@@ -33,7 +33,6 @@ export default function Accordion(props: AccordionProps) {
 
     return (
         <View style={styles.accordion}>
-
             <View style={{ position: 'absolute', top: 0, opacity: 0, pointerEvents: 'none' }}
                 onLayout={(event) => {
                     measuredHeight.value = event.nativeEvent.layout.height;
@@ -42,16 +41,23 @@ export default function Accordion(props: AccordionProps) {
                     {props.content}
                 </Text>
             </View>
-            <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)} style={styles.accordionTrigger}>
-                <View style={styles.triggerContent}>
-                    <View style={styles.title}>
-                        <Text style={styles.titleText}>Sinopsis</Text>
+            <View style={styles.accordionTrigger}>
+                <TouchableNativeFeedback
+                    
+                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
+                    useForeground={true}
+                    onPress={() => setIsExpanded(!isExpanded)}
+                >
+                    <View style={styles.triggerContent}>
+                        <View style={styles.title}>
+                            <Text style={styles.titleText}>Sinopsis</Text>
+                        </View>
+                        <Animated.View style={[styles.icon, animatedArrow]}>
+                            <Ionicons name="chevron-down" size={24} color={isExpanded ? Theme.colors.vermillion : Theme.colors.midGray} />
+                        </Animated.View>
                     </View>
-                    <Animated.View style={[styles.icon, animatedArrow]}>
-                        <Ionicons name="chevron-down" size={24} color={isExpanded ? Theme.colors.vermillion : Theme.colors.midGray} />
-                    </Animated.View>
-                </View>
-            </TouchableOpacity>
+                </TouchableNativeFeedback>
+            </View>
             <Animated.View
                 style={animatedAccordion}
             >
