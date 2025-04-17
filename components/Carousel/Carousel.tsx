@@ -11,18 +11,21 @@ import { Theme } from '../../theme/Theme';
 import Toast from '../Toast/Toast';
 
 interface CarouselProps {
-    images: object;
+    images: string[];
+    hash: string;
     format: string;
     onSingleTap: () => void;
     menuVisible: boolean;
+    storedData: boolean;
+    downloadDirectory?: string;
 }
 
-export default function Carousel({ images, format, onSingleTap, menuVisible }: CarouselProps) {
+export default function Carousel({ images, hash, format, onSingleTap, menuVisible, storedData, downloadDirectory = '' }: CarouselProps) {
 
     const scrollX = useSharedValue(0);
     const flatListRef = useAnimatedRef<Animated.FlatList<any>>();
     const THUMB_WITH = 20
-    const imagesLength = images.chapter.dataSaver.length;
+    const imagesLength = images.length;
     const [currentPage, setCurrentPage] = useState(1);
 
     const panGesture = Gesture.Pan()
@@ -107,15 +110,15 @@ export default function Carousel({ images, format, onSingleTap, menuVisible }: C
         return {
             transform: [{
                 translateY: menuVisible
-                ? withTiming(-100, { duration: 200 })
-                : withTiming(-10, { duration: 200 })
+                    ? withTiming(-100, { duration: 200 })
+                    : withTiming(-10, { duration: 200 })
             }]
         }
     })
 
     useEffect(() => {
         const instruction = format === 'Normal' ? 'Leer de derecha a izquierda' : 'Leer hacia abajo';
-        Toast({message: instruction})
+        Toast({ message: instruction, duration: ToastAndroid.SHORT })
     }, [])
 
     return (
@@ -126,9 +129,9 @@ export default function Carousel({ images, format, onSingleTap, menuVisible }: C
                         ref={flatListRef}
                         onScroll={scrollHandler}
                         scrollEventThrottle={16}
-                        showsHorizontalScrollIndicator={false}
-                        data={images.chapter.dataSaver}
-                        keyExtractor={(item) => `dataSaver-${images.chapter.hash}-${item}`}
+                        showsHorizontalScrollIndicator={format !== 'Normal'}
+                        data={images}
+                        keyExtractor={(item) => `dataSaver-${hash}-${item}`}
                         horizontal={format === 'Normal'}
                         inverted={format === 'Normal'}
                         pagingEnabled={format === 'Normal'}
@@ -137,7 +140,7 @@ export default function Carousel({ images, format, onSingleTap, menuVisible }: C
                                 <Animated.View style={{ flex: 1, minWidth: MAX_WIDTH, minHeight: MAX_HEIGHT }}>
                                     <Image
                                         transition={100}
-                                        source={`${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${images.chapter.hash}/${item}`}
+                                        source={storedData ? `${downloadDirectory}/${item}` : `${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${hash}/${item}`}
                                         style={{ width: '100%', height: '100%' }}
                                         contentFit='contain' />
                                 </Animated.View>
@@ -162,7 +165,7 @@ export default function Carousel({ images, format, onSingleTap, menuVisible }: C
                             <Animated.View
                                 style={styles.sliderTrack}>
                                 <View style={styles.dotContainer}>
-                                    {images.chapter.dataSaver.map((_, index) => (
+                                    {images.map((_, index) => (
                                         <Animated.View
                                             key={index}
                                             style={[styles.dot, animatedDotStyle(index)]}
