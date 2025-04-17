@@ -4,6 +4,7 @@ import { Theme } from "../../theme/Theme";
 export const styles = StyleSheet.create({
     header: {
         width: '100%',
+        top: 0,
         height: 55,
         paddingHorizontal: 15,
 
