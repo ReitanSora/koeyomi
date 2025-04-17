@@ -91,6 +91,9 @@ export default function MangaDetailsScreen({ route }) {
                 };
                 const filteredData = savedData.filter((item) => item.attributes.translatedLanguage === language)
                 if (filteredData.length > 0) {
+                    filteredData.sort((a, b) => {
+                        return parseFloat(b.attributes.chapter) - parseFloat(a.attributes.chapter);
+                    })
                     setChapters(filteredData)
                     return;
                 }
@@ -106,6 +109,9 @@ export default function MangaDetailsScreen({ route }) {
                 response
             );
             const filteredData = data.filter((item) => item.attributes.translatedLanguage === language)
+            filteredData.sort((a, b) => {
+                return parseFloat(b.attributes.chapter) - parseFloat(a.attributes.chapter);
+            })
             setChapters(filteredData)
 
         } catch (error) {
@@ -173,6 +179,7 @@ export default function MangaDetailsScreen({ route }) {
 
             setManga(resultData);
 
+            Toast({ message: `MangaInfo updated`, duration: ToastAndroid.SHORT })
         } catch (error) {
             Toast({ message: `Error while refreshing manga: ${error}` })
             console.log(error)
@@ -203,22 +210,26 @@ export default function MangaDetailsScreen({ route }) {
                 return;
             };
 
-            // ToDo: Implement delete sentence that only affects chapter's id of the selected Language
+            let savedChaptersIds: any[] = [];
+            filteredSavedData.filter((item) => {
+                savedChaptersIds.push(item.id);
+            });
 
-            await db.runAsync(
-                'DELETE FROM chapters WHERE manga_id = ?',
-                [id]
-            );
+            let newChapters: any[] = [];
+            response.data.filter((item) => {
+                if (!savedChaptersIds.includes(item.id)) {
+                    newChapters.push(item);
+                }
+            })
 
-            const refreshData = await saveToDatabase(
-                'chapters',
-                response
-            );
-
-            const filteredRefreshData = refreshData.filter((item) => item.attributes.translatedLanguage === language);
-
+            const refreshedChapters = await updateChapters(newChapters);
+            const filteredRefreshData = refreshedChapters.filter((item) => item.attributes.translatedLanguage === language);
+            filteredRefreshData.sort((a, b) => {
+                return parseFloat(b.attributes.chapter) - parseFloat(a.attributes.chapter);
+            })
             setChapters(filteredRefreshData);
 
+            Toast({ message: `Chapters updated`, duration: ToastAndroid.SHORT })
         } catch (error) {
             Toast({ message: `Error while refreshing chapters: ${error}` })
             console.log(error)
@@ -242,6 +253,32 @@ export default function MangaDetailsScreen({ route }) {
 
         savedData.attributes = JSON.parse(savedData.attributes);
         savedData.relationships = JSON.parse(savedData.relationships);
+
+        return savedData;
+    }
+
+    async function updateChapters(fetchData: []) {
+        for (const newChapter of fetchData) {
+            await db.runAsync(
+                'INSERT INTO chapters (id, manga_id, type, attributes, relationships) VALUES (?, ?, ?, ?, ?)',
+                [
+                    newChapter.id,
+                    id,
+                    newChapter.type,
+                    JSON.stringify(newChapter.attributes),
+                    JSON.stringify(newChapter.relationships)
+                ]
+            );
+        };
+
+        const savedData = await db.getAllAsync('SELECT * FROM chapters WHERE manga_id = ?', [id]);
+
+        if (Array.isArray(savedData)) {
+            for (const row of savedData) {
+                row.attributes = JSON.parse(row.attributes);
+                row.relationships = JSON.parse(row.relationships);
+            }
+        }
 
         return savedData;
     }
