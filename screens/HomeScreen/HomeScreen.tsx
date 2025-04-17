@@ -49,7 +49,7 @@ export default function HomeScreen() {
     const searchFilterFunction = useCallback((text: string) => {
         if (text) {
             const newData = mangaItems.filter(item => {
-                const itemData = item.title ? item.title.toLowerCase() : ''.toLowerCase();
+                const itemData = item.attributes.title.ja ? item.attributes.title.ja.toLowerCase() : item.attributes.title.en.toLowerCase();
                 const textData = text.toLowerCase();
                 return itemData.indexOf(textData) > -1;
             })
@@ -137,7 +137,12 @@ export default function HomeScreen() {
                                             contentFit='cover'
                                         />
                                         <View style={[styles.mangaItemFooter, columns > 2 ? { height: 20 } : { height: 30 }]}>
-                                            <Text style={[styles.mangaItemTitle, columns > 2 ? { fontSize: Theme.fonts.tiny } : { fontSize: Theme.fonts.paragraph }]} numberOfLines={1}>{item.attributes.title.ja}</Text>
+                                            <Text
+                                                style={[styles.mangaItemTitle, columns > 2 ? { fontSize: Theme.fonts.tiny } : { fontSize: Theme.fonts.paragraph }]}
+                                                numberOfLines={1}
+                                            >
+                                                {item.attributes.title.ja ? item.attributes.title.ja : item.attributes.title.en}
+                                            </Text>
                                         </View>
                                     </View>
                                 </TouchableNativeFeedback>
