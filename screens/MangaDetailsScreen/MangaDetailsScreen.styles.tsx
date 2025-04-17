@@ -111,26 +111,32 @@ export const styles = StyleSheet.create({
     },
     //Language Selector
     languageSelector:{
-        marginVertical: 10,
+        marginTop: 10,
+        paddingHorizontal: 10,
 
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 20,
+        justifyContent: 'flex-start',
+        gap: 10,
     },
     languageItem:{
-        paddingHorizontal: 5,
+        width: 100,
+        backgroundColor: Theme.colors.gunmetalGray,
+        paddingHorizontal: 15,
 
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,
 
-        borderBottomWidth: 1,
+        borderBottomWidth: 2,
         borderColor: Theme.colors.midGray,
+        borderTopEndRadius: Theme.borders.cardItem,
+        borderTopStartRadius: Theme.borders.cardItem,
     },
     languageText:{
         fontSize: Theme.fonts.paragraph,
+        fontWeight: 'bold',
         color: Theme.colors.midGray,
     },
     

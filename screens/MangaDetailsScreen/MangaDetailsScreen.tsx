@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, FlatList, RefreshControl, ToastAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, RefreshControl, ToastAndroid, TouchableNativeFeedback } from 'react-native';
 import { Theme } from '../../theme/Theme';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +11,7 @@ import * as WebBrowser from 'expo-web-browser';
 import Accordion from '../../components/Accordion/Accordion';
 import { MAX_HEIGHT } from '../../constants/Constants';
 import { MexicoFlag, UnitedStatesFlag } from '../../components/Flags/Flags';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSQLiteContext } from 'expo-sqlite';
 import Toast from '../../components/Toast/Toast';
 import ChapterItem from '../../components/ChapterItem/ChapterItem';
@@ -32,6 +32,12 @@ export default function MangaDetailsScreen({ route }) {
 
     const blurhash = 'L68{CzsEJ5s?Orbc}1bHEZoLW9j?';
     const db = useSQLiteContext()
+
+    const languageOptionAnimated = useAnimatedStyle(() => {
+        return {
+            borderWidth: language ? withTiming(5, { duration: 500 }) : withTiming(1, { duration: 500 }),
+        }
+    })
 
 
     const handleBrowserAsync = async (id: string) => {
@@ -359,7 +365,9 @@ export default function MangaDetailsScreen({ route }) {
     useEffect(() => {
         if (!manga) return;
 
-        setAvailableLanguages(manga.attributes.availableTranslatedLanguages);
+        setAvailableLanguages(manga.attributes.availableTranslatedLanguages.filter(item => {
+            if (item === 'es-la' || item === 'en') { return item }
+        }))
 
         const format = manga.attributes.tags?.find(
             (item) => item.attributes?.name?.en === 'Long Strip'
@@ -468,23 +476,27 @@ export default function MangaDetailsScreen({ route }) {
                                     <Accordion content={manga.attributes.description['es-la'] ? manga.attributes.description['es-la'] : manga.attributes.description.en}></Accordion>
                                 </View>
                                 <View style={styles.languageSelector}>
-                                    {availableLanguages?.find((item) => item === 'en') &&
-                                        <TouchableOpacity
-                                            onPress={() => handleLanguageSelector('en')}>
-                                            <Animated.View style={[styles.languageItem, language === 'en' && { borderColor: Theme.colors.vermillion }]}>
-                                                <Text style={styles.languageText}>MangaDex</Text>
-                                                <UnitedStatesFlag width={16} />
-                                            </Animated.View>
-                                        </TouchableOpacity>
-                                    }
-                                    {availableLanguages?.find((item) => item === 'es-la') &&
-                                        <TouchableOpacity
-                                            onPress={() => handleLanguageSelector('es-la')}>
-                                            <Animated.View style={[styles.languageItem, language === 'es-la' && { borderColor: Theme.colors.vermillion }]}>
-                                                <Text style={styles.languageText}>MangaDex</Text>
-                                                <MexicoFlag width={16} />
-                                            </Animated.View>
-                                        </TouchableOpacity>
+                                    {availableLanguages?.map(item => {
+                                        return (
+                                            <View
+                                                style={{ borderTopEndRadius: Theme.borders.cardItem, borderTopStartRadius: Theme.borders.cardItem, overflow: 'hidden' }}
+                                                key={`languageOption-${item}`}
+                                            >
+                                                <TouchableNativeFeedback
+                                                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
+                                                    useForeground={true}
+                                                    onPress={() => handleLanguageSelector(item)}
+                                                >
+                                                    <Animated.View
+                                                        style={[styles.languageItem, language === item ? { backgroundColor: Theme.colors.jetgray } : { opacity: 0.4 }]}
+                                                    >
+                                                        <Text style={styles.languageText}>{`${item.toUpperCase()}`}</Text>
+                                                        {item === 'en' ? <UnitedStatesFlag width={16} /> : <MexicoFlag width={16} />}
+                                                    </Animated.View>
+                                                </TouchableNativeFeedback>
+                                            </View>
+                                        )
+                                    })
                                     }
                                 </View>
                             </>
