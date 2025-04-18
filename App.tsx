@@ -52,7 +52,8 @@ async function initDatabase(db: SQLiteDatabase) {
         attributes TEXT NOT NULL,
         relationships TEXT NOT NULL,
         download_status TEXT CHECK (download_status IN ('not_downloaded', 'downloaded')) DEFAULT 'not_downloaded',
-        file_path TEXT
+        file_path TEXT,
+        last_page_read TEXT DEFAULT '-1'
       );
       CREATE TABLE IF NOT EXISTS favorites(
         user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
