@@ -33,13 +33,6 @@ export default function MangaDetailsScreen({ route }) {
     const blurhash = 'L68{CzsEJ5s?Orbc}1bHEZoLW9j?';
     const db = useSQLiteContext()
 
-    const languageOptionAnimated = useAnimatedStyle(() => {
-        return {
-            borderWidth: language ? withTiming(5, { duration: 500 }) : withTiming(1, { duration: 500 }),
-        }
-    })
-
-
     const handleBrowserAsync = async (id: string) => {
         await WebBrowser.openBrowserAsync(`${process.env.EXPO_PUBLIC_MYANIMELIST_BASE_URL}/manga/${id}`)
     };
