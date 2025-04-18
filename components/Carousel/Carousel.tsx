@@ -9,8 +9,10 @@ import Zoom from '../Zoom/Zoom';
 import { Ionicons } from '@expo/vector-icons';
 import { Theme } from '../../theme/Theme';
 import Toast from '../Toast/Toast';
+import { useSQLiteContext } from 'expo-sqlite';
 
 interface CarouselProps {
+    id: string;
     images: string[];
     hash: string;
     format: string;
@@ -20,13 +22,16 @@ interface CarouselProps {
     downloadDirectory?: string;
 }
 
-export default function Carousel({ images, hash, format, onSingleTap, menuVisible, storedData, downloadDirectory = '' }: CarouselProps) {
+export default function Carousel({ id, images, hash, format, onSingleTap, menuVisible, storedData, downloadDirectory = '' }: CarouselProps) {
 
     const scrollX = useSharedValue(0);
     const flatListRef = useAnimatedRef<Animated.FlatList<any>>();
     const THUMB_WITH = 20
     const imagesLength = images.length;
     const [currentPage, setCurrentPage] = useState(1);
+    const [lastPageRead, setLastPageRead] = useState('');
+
+    const db = useSQLiteContext();
 
     const panGesture = Gesture.Pan()
         .onUpdate((e) => {
@@ -116,10 +121,42 @@ export default function Carousel({ images, hash, format, onSingleTap, menuVisibl
         }
     })
 
+    async function updateLastPageRead() {
+        await db.runAsync(
+            'UPDATE chapters SET last_page_read = ? WHERE id = ?',
+            [
+                `${currentPage - 1}`,
+                id
+            ]
+        );
+    }
+
+    async function getLastPageRead() {
+        const lastPage = await db.getFirstAsync('SELECT * FROM chapters WHERE id = ?', [id]);
+        flatListRef.current?.scrollToIndex({ animated: false, index: parseInt(lastPage.last_page_read) });
+    }
+
     useEffect(() => {
-        const instruction = format === 'Normal' ? 'Leer de derecha a izquierda' : 'Leer hacia abajo';
-        Toast({ message: instruction, duration: ToastAndroid.SHORT })
+        try {
+            db.withTransactionAsync(async () => {
+                await getLastPageRead();
+            })
+            const instruction = format === 'Normal' ? 'Leer de derecha a izquierda' : 'Leer hacia abajo';
+            Toast({ message: instruction, duration: ToastAndroid.SHORT })
+        } catch (error) {
+            Toast({ message: `Error in Carousel. ${error}` })
+        }
     }, [])
+
+    useEffect(() => {
+        try {
+            db.withTransactionAsync(async () => {
+                await updateLastPageRead();
+            })
+        } catch (error) {
+            Toast({ message: `Error in Carousel. ${error}` })
+        }
+    }, [currentPage])
 
     return (
         <GestureHandlerRootView>
