@@ -29,7 +29,6 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     const THUMB_WITH = 20
     const imagesLength = images.length;
     const [currentPage, setCurrentPage] = useState(1);
-    const [lastPageRead, setLastPageRead] = useState('');
 
     const db = useSQLiteContext();
 
