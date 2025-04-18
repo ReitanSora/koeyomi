@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     pagination: {
         position: 'absolute',
         bottom: 40,
-        width: (MAX_WIDTH * 0.6),
+        width: (MAX_WIDTH * 0.65),
         height: 50,
         backgroundColor: Theme.colors.jetgray,
         paddingHorizontal: 20,
@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
 
         borderRadius: 25,
 
-        transform: [{ rotate: '180deg' }]
+        transform: [{ rotate: '180deg' }],
     },
     paginationButton: {
         position: 'absolute',
@@ -44,14 +44,14 @@ export const styles = StyleSheet.create({
     },
     sliderTrack: {
         width: '100%',
-        height: 4,
+        height: 2,
         backgroundColor: 'rgba(255,69,0,0.1)',
 
         alignSelf: 'center',
         alignItems: 'center',
         justifyContent: 'center',
 
-        borderRadius: 4,
+        borderRadius: 2,
     },
     dotContainer: {
         width: '100%',
@@ -60,11 +60,11 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     dot: {
-        height: 4,
-        width: 4,
+        height: 2,
+        width: 2,
         backgroundColor: Theme.colors.vermillion,
 
-        borderRadius: 4,
+        borderRadius: 2,
     },
     sliderThumb: {
         width: 20,
@@ -73,11 +73,23 @@ export const styles = StyleSheet.create({
         backgroundColor: Theme.colors.vermillion,
         position: 'absolute',
         left: -10,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sliderThumbText:{
+        position:'absolute',
+
+        fontSize: Theme.fonts.tiny,
+        fontWeight: 'bold',
+        color: Theme.colors.jetgray,
+
+        transform: [{ rotate: '180deg' }],
     },
     pageNumber:{
         position: 'absolute',
         bottom: 0,
-        backgroundColor: Theme.colors.jetgray,
+        backgroundColor: Theme.colors.gunmetalGray,
         paddingHorizontal: 10,
         paddingVertical: 5,
 

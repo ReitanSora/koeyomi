@@ -34,12 +34,12 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
 
     const panGesture = Gesture.Pan()
         .onUpdate((e) => {
-            const trackPosition = (MAX_WIDTH - (MAX_WIDTH * 0.6)) / 2;
+            const trackPosition = (MAX_WIDTH - (MAX_WIDTH * 0.65)) / 2;
             const newPos = e.absoluteX - trackPosition - THUMB_WITH / 2;
             const currentPage = Math.floor(
                 interpolate(
                     newPos,
-                    [(MAX_WIDTH * 0.6), 0],
+                    [(MAX_WIDTH * 0.65), 0],
                     [imagesLength, 0],
                     Extrapolation.CLAMP
                 )
@@ -94,7 +94,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                 translateX: interpolate(
                     scrollX.value,
                     [(imagesLength - 1) * MAX_WIDTH, 0],
-                    [(MAX_WIDTH * 0.6) - THUMB_WITH - 22, 2],
+                    [(MAX_WIDTH * 0.65) - THUMB_WITH - 21, 1],
                     Extrapolation.CLAMP
                 )
             }],
@@ -171,6 +171,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                         horizontal={format === 'Normal'}
                         inverted={format === 'Normal'}
                         pagingEnabled={format === 'Normal'}
+                        initialNumToRender={images.length}
                         renderItem={({ item }) => {
                             return (
                                 <Animated.View style={{ flex: 1, minWidth: MAX_WIDTH, minHeight: MAX_HEIGHT }}>
@@ -208,7 +209,9 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                                         />
                                     ))}
                                 </View>
-                                <Animated.View style={[styles.sliderThumb, sliderStyle]} />
+                                <Animated.View style={[styles.sliderThumb, sliderStyle]}>
+                                    <Text style={styles.sliderThumbText}>{currentPage}</Text>
+                                </Animated.View>
                             </Animated.View>
                         </GestureDetector>
                         <TouchableNativeFeedback
