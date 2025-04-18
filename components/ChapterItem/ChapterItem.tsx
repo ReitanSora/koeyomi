@@ -25,6 +25,7 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
 
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
     const [isDownloaded, setIsDownloaded] = useState<boolean>(item.download_status === 'not_downloaded' ? false : true);
+    const [alreadySeen, setAlreadySeen] = useState<boolean>(parseInt(item.last_page_read) >= 0);
 
     const db = useSQLiteContext();
 
@@ -112,18 +113,19 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
                             id: item.id,
                             format: format,
                             title: title,
-                            subtitle: item.attributes.title,
+                            subtitle: `${item.attributes.chapter} - ${item.attributes.title}`
                         }
-                    })
+                    });
+                    setAlreadySeen(true);
                 }}
             >
                 <View style={styles.chapterItem}>
                     <View style={styles.chapterInfo}>
-                        <View style={styles.chapterTitle}>
+                        <View style={[styles.chapterTitle, alreadySeen && {opacity: 0.4}]}>
                             <Text style={styles.chapterTitleText} numberOfLines={1}>Capítulo {item.attributes.chapter}</Text>
                             <Text style={styles.chapterTitleText} numberOfLines={1} lineBreakMode='tail'>{item.attributes.title && ` | ${item.attributes.title}`}</Text>
                         </View>
-                        <View style={styles.chapterPublisher}>
+                        <View style={[styles.chapterPublisher, alreadySeen && {opacity: 0.4}]}>
                             <Text style={styles.chapterPublisherText} numberOfLines={1}>{date}</Text>
                             <Text style={styles.chapterPublisherText} numberOfLines={1} lineBreakMode='tail'>{author && ` | ${author.attributes.name}`}</Text>
                         </View>
@@ -185,7 +187,6 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
                                 </TouchableNativeFeedback>
                             </Animated.View>
                         )}
-
                     </View>
                 </View>
             </TouchableNativeFeedback>
