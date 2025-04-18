@@ -49,7 +49,6 @@ export default function MangaReaderScreen({ route }: any) {
                 db.withTransactionAsync(async () => {
                     await getSavedImages();
                 });
-
             } catch (error) {
                 Toast({ message: `Error while loading images: ${error}`, duration: ToastAndroid.SHORT })
             }
@@ -103,6 +102,7 @@ export default function MangaReaderScreen({ route }: any) {
 
                 {imagesUrl &&
                     <Carousel
+                        id={id}
                         images={imagesUrl}
                         hash={hash}
                         format={format}
