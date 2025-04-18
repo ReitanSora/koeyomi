@@ -10,6 +10,7 @@ export interface ChapterItemInterface {
     relationships: [];
     download_status: string;
     file_path: string;
+    last_page_read: string;
 }
 
 export interface ChapterImagesInterface {
