@@ -60,7 +60,7 @@ export default function SearchScreen() {
                 <Header
                     isSearchBarVisible={isSearchBarVisible}
                     setIsSearchBarVisible={setIsSearchBarVisible}
-                    title={'Buscar'}
+                    title={'Search'}
                     isFilterSearch={false}
                     inputValue={searchTitle}
                     handleSearch={handleSearch}
