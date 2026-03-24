@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
         gap: 10
     },
     mangaItemWrapper:{
-        borderRadius: 20,
+        borderRadius: Theme.borders.cardItem,
 
         overflow: 'hidden'
     },
