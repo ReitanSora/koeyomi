@@ -23,12 +23,12 @@ const MyTheme = {
 };
 
 function RootTabs(props: any) {
-    const screensWithTabBar = ['HomeScreen', 'SearchScreen', 'Historial', 'SettingScreen']
+    const screensWithTabBar = ['HomeScreen', 'SearchScreen', 'History', 'SettingScreen']
     const hideTabBar = !screensWithTabBar.includes(props.routeName);
 
     return (
         <Tab.Navigator
-            initialRouteName="Inicio"
+            initialRouteName="Home"
             backBehavior="none"
             screenOptions={{
                 tabBarStyle: {
@@ -52,24 +52,24 @@ function RootTabs(props: any) {
                 // animation: 'fade',
             }}>
             <Tab.Screen
-                name='Inicio'
+                name='Home'
                 component={HomeStack}
             >
             </Tab.Screen>
             <Tab.Screen
-                name='Buscar'
+                name='Search'
                 component={SearchStack}
                 options={{
                 }}>
             </Tab.Screen>
             <Tab.Screen
-                name='Historial'
+                name='History'
                 component={HistoryScreen}
                 options={{
                 }}>
             </Tab.Screen>
             <Tab.Screen
-                name='Configuración'
+                name='Settings'
                 component={SettingStack}
                 options={{
                 }}>
