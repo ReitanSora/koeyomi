@@ -7,22 +7,25 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "android":{
+      "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
-      "android":{
+      "android": {
         "image": "latest",
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
-      "android":{
+      "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {
