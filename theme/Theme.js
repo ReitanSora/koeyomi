@@ -16,7 +16,7 @@ export const Theme = {
         circle: '100%',
         input: 7,
         cardItem: 15,
-        image: 20,
+        image: 10,
     },
     fonts: {
         title: 20.5,
