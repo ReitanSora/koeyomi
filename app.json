@@ -1,30 +1,33 @@
 {
   "expo": {
-    "name": "koeyomi",
+    "name": "Koeyomi",
     "slug": "koeyomi",
-    "version": "1.0.0",
+    "version": "0.1.1",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.reitansora.koeyomi",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icons/android-adaptive-icon-color.png",
+        "monochromeImage": "./assets/icons/android-adaptive-icon.png",
+        "backgroundColor": "#1E1E1E"
       },
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"],
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "package": "com.reitansora.koeyomi"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icons/favicon.png"
     },
     "plugins": [
       [
@@ -33,12 +36,31 @@
           "enableFTS": true,
           "useSQLCipher": true
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/splash/splash-icon-light.png",
+          "dark": {
+            "image": "./assets/splash/splash-icon-dark.png",
+            "backgroundColor": "#1E1E1E"
+          },
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
       ]
     ],
     "extra": {
       "eas": {
         "projectId": "cd48f66c-165f-4cea-a674-fa3db320bacd"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/cd48f66c-165f-4cea-a674-fa3db320bacd"
     }
   }
 }
