@@ -106,7 +106,7 @@ export default function SearchScreen() {
                                                             numberOfLines={1}
                                                             ellipsizeMode='tail'
                                                             style={styles.titleText}>
-                                                            {item.attributes.title.ja ? item.attributes.title.ja : item.attributes.title.en}
+                                                            {item.attributes.title.ja !== "" ? item.attributes.title.ja : (item.attributes.title["ja-ro"] ? item.attributes.title["ja-ro"] : (item.attributes.title.en ? item.attributes.title.en : item.attributes.title["zh-ro"]))}
                                                         </Text>
                                                     </View>
                                                     <View style={styles.status}>

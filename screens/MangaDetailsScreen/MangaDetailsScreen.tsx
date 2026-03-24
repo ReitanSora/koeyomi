@@ -367,7 +367,8 @@ export default function MangaDetailsScreen({ route }) {
         );
         setMangaFormat(format ? format.attributes.name.en : 'Normal');
 
-        setTitle(manga.attributes.title.ja || manga.attributes.title.en || 'Sin título');
+        const tempTitle = manga.attributes.title.ja !== "" ? manga.attributes.title.ja : (manga.attributes.title["ja-ro"] ? manga.attributes.title["ja-ro"] : (manga.attributes.title.en ? manga.attributes.title.en : manga.attributes.title["zh-ro"]))
+        setTitle(tempTitle);
 
     }, [manga]);
 
@@ -413,7 +414,7 @@ export default function MangaDetailsScreen({ route }) {
                                     <View style={styles.mangaInfo}>
                                         <View style={styles.mangaTitle}>
                                             <Text style={styles.title}>
-                                                {manga.attributes.title.ja ? manga.attributes.title.ja : manga.attributes.title.en}
+                                                {title}
                                             </Text>
                                             <View style={styles.author}>
                                                 <Ionicons name="person-circle-outline" size={15} color={Theme.colors.midGray} />
