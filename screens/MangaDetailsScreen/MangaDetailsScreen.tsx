@@ -383,7 +383,6 @@ export default function MangaDetailsScreen({ route }) {
                         initialNumToRender={30}
                         maxToRenderPerBatch={20}
                         windowSize={31}
-                        removeClippedSubviews={true}
                         refreshControl={
                             <RefreshControl
                                 refreshing={isLoading}
