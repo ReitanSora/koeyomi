@@ -47,6 +47,7 @@ export default function MangaReaderScreen({ route }: any) {
         const getImagesUrl = async () => {
             try {
                 db.withTransactionAsync(async () => {
+                    await saveTimestamp();
                     await getSavedImages();
                 });
             } catch (error) {
@@ -87,6 +88,36 @@ export default function MangaReaderScreen({ route }: any) {
             console.log(error);
         }
     };
+
+    async function saveTimestamp() {
+        try {
+            const record = await db.getFirstAsync(
+                'SELECT * FROM records WHERE chapter_id = ?',
+                [id]
+            );
+
+            if (record) {
+                await db.runAsync(
+                    'UPDATE records SET timestamp = ? WHERE chapter_id = ?',
+                    [
+                        `${Date.now()}`,
+                        id
+                    ]
+                );
+            } else {
+                await db.runAsync(
+                    'INSERT INTO records (user_id, chapter_id, timestamp) VALUES (?, ?, ?)',
+                    [
+                        'Redmi-2015-2201117TL-13',
+                        id,
+                        `${Date.now()}`
+                    ]
+                );
+            }
+        } catch (error) {
+            Toast({ message: `Error while saving date: ${error}`, duration: ToastAndroid.SHORT });
+        }
+    }
 
     return (
         <SafeAreaProvider>
