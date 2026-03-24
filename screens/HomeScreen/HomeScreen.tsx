@@ -30,7 +30,6 @@ export default function HomeScreen() {
                 ['Redmi-2015-2201117TL-13']
             )
             for (const favorite of favorites) {
-                console.log(favorite);
                 const savedData = await db.getFirstAsync(
                     'SELECT * FROM mangas WHERE id = ?',
                     [favorite.manga_id]
@@ -46,10 +45,11 @@ export default function HomeScreen() {
 
     }
 
-    const searchFilterFunction = useCallback((text: string) => {
+    const searchFilterFunction = (text: string) => {
         if (text) {
             const newData = mangaItems.filter(item => {
-                const itemData = item.attributes.title.ja ? item.attributes.title.ja.toLowerCase() : item.attributes.title.en.toLowerCase();
+                const title = item.attributes.title.ja || item.attributes.title.en;
+                const itemData = title.toLowerCase();
                 const textData = text.toLowerCase();
                 return itemData.indexOf(textData) > -1;
             })
@@ -57,7 +57,7 @@ export default function HomeScreen() {
         } else {
             setFilteredData(mangaItems);
         }
-    }, []);
+    };
 
     const onRefresh = () => {
         setLoading(true);
@@ -106,7 +106,7 @@ export default function HomeScreen() {
                 <Header
                     isSearchBarVisible={isSearchBarVisible}
                     setIsSearchBarVisible={setIsSearchBarVisible}
-                    title={'Librería'}
+                    title={'Library'}
                     isFilterSearch={true}
                     handleFilter={searchFilterFunction}
                     handleClose={handleCloseSearchBar}
