@@ -141,7 +141,7 @@ export default function HomeScreen() {
                                                 style={[styles.mangaItemTitle, columns > 2 ? { fontSize: Theme.fonts.tiny } : { fontSize: Theme.fonts.paragraph }]}
                                                 numberOfLines={1}
                                             >
-                                                {item.attributes.title.ja ? item.attributes.title.ja : item.attributes.title.en}
+                                                {item.attributes.title.ja !== "" ? item.attributes.title.ja : (item.attributes.title["ja-ro"] ? item.attributes.title["ja-ro"] : (item.attributes.title.en ? item.attributes.title.en : item.attributes.title["zh-ro"]))}
                                             </Text>
                                         </View>
                                     </View>
