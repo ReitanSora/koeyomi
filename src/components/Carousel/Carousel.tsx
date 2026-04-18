@@ -1,0 +1,235 @@
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useEffect, useState } from 'react';
+import { Text, ToastAndroid, TouchableNativeFeedback, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { Extrapolation, interpolate, runOnJS, scrollTo, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { MAX_HEIGHT, MAX_WIDTH } from '../../Constants';
+import { Theme } from '../../Theme';
+import Toast from '../Toast/Toast';
+import Zoom from '../Zoom/Zoom';
+import { styles } from './Carousel.styles';
+
+interface CarouselProps {
+    id: string;
+    images: string[];
+    hash: string;
+    format: string;
+    onSingleTap: () => void;
+    menuVisible: boolean;
+    storedData: boolean;
+    downloadDirectory?: string;
+}
+
+export default function Carousel({ id, images, hash, format, onSingleTap, menuVisible, storedData, downloadDirectory = '' }: CarouselProps) {
+
+    const scrollX = useSharedValue(0);
+    const flatListRef = useAnimatedRef<Animated.FlatList<any>>();
+    const THUMB_WITH = 20
+    const imagesLength = images.length;
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const db = useSQLiteContext();
+
+    const panGesture = Gesture.Pan()
+        .onUpdate((e) => {
+            const trackPosition = (MAX_WIDTH - (MAX_WIDTH * 0.65)) / 2;
+            const newPos = e.absoluteX - trackPosition - THUMB_WITH / 2;
+            const currentPage = Math.floor(
+                interpolate(
+                    newPos,
+                    [(MAX_WIDTH * 0.65), 0],
+                    [imagesLength, 0],
+                    Extrapolation.CLAMP
+                )
+            );
+
+            scrollX.value = ((imagesLength - 1) * MAX_WIDTH) - (currentPage * MAX_WIDTH);
+            scrollTo(flatListRef, scrollX.value, 0, false)
+        })
+
+    const scrollHandler = useAnimatedScrollHandler({
+        onScroll: (event) => {
+            scrollX.value = event.contentOffset.x;
+            const page = Math.floor(event.contentOffset.x / MAX_WIDTH + 0.5)
+            runOnJS(setCurrentPage)(page + 1)
+        },
+    });
+
+    const animatedDotStyle = (index: number) => {
+
+        return useAnimatedStyle(() => {
+            const inputRange = [
+                (index - 1) * MAX_WIDTH,
+                index * MAX_WIDTH,
+                (index + 1) * MAX_WIDTH,
+            ];
+
+            const opacity = interpolate(
+                scrollX.value,
+                inputRange,
+                [0.3, 1, 0.3],
+                Extrapolation.CLAMP
+            );
+
+            const scale = interpolate(
+                scrollX.value,
+                inputRange,
+                [0.7, 1.2, 0.7],
+                Extrapolation.CLAMP
+            );
+
+            return {
+                opacity,
+                transform: [{ scale }],
+            };
+        });
+    };
+
+    const sliderStyle = useAnimatedStyle(() => {
+
+        return {
+            transform: [{
+                translateX: interpolate(
+                    scrollX.value,
+                    [(imagesLength - 1) * MAX_WIDTH, 0],
+                    [(MAX_WIDTH * 0.65) - THUMB_WITH - 21, 1],
+                    Extrapolation.CLAMP
+                )
+            }],
+        }
+    })
+
+    const paginationStyle = useAnimatedStyle(() => {
+        return {
+            opacity: menuVisible
+                ? withTiming(1, { duration: 200 })
+                : withTiming(0, { duration: 200 }),
+        }
+    })
+
+    const pageNumberStyle = useAnimatedStyle(() => {
+
+        return {
+            transform: [{
+                translateY: menuVisible
+                    ? withTiming(-100, { duration: 200 })
+                    : withTiming(-10, { duration: 200 })
+            }]
+        }
+    })
+
+    async function updateLastPageRead() {
+        await db.runAsync(
+            'UPDATE chapters SET last_page_read = ? WHERE id = ?',
+            [
+                `${currentPage - 1}`,
+                id
+            ]
+        );
+    }
+
+    async function getLastPageRead() {
+        const lastPage = await db.getFirstAsync('SELECT * FROM chapters WHERE id = ?', [id]);
+        flatListRef.current?.scrollToIndex({ animated: false, index: parseInt(lastPage.last_page_read) });
+    }
+
+    useEffect(() => {
+        try {
+            db.withTransactionAsync(async () => {
+                await getLastPageRead();
+            })
+            const instruction = format === 'Normal' ? 'Leer de derecha a izquierda' : 'Leer hacia abajo';
+            Toast({ message: instruction, duration: ToastAndroid.SHORT })
+        } catch (error) {
+            Toast({ message: `Error in Carousel. ${error}` })
+        }
+    }, [])
+
+    useEffect(() => {
+        try {
+            db.withTransactionAsync(async () => {
+                await updateLastPageRead();
+            })
+        } catch (error) {
+            Toast({ message: `Error in Carousel. ${error}` })
+        }
+    }, [currentPage])
+
+    return (
+        <GestureHandlerRootView>
+            <Zoom onSingleTap={onSingleTap}>
+                <View>
+                    <Animated.FlatList
+                        ref={flatListRef}
+                        onScroll={scrollHandler}
+                        scrollEventThrottle={16}
+                        showsHorizontalScrollIndicator={format !== 'Normal'}
+                        data={images}
+                        keyExtractor={(item) => `dataSaver-${hash}-${item}`}
+                        horizontal={format === 'Normal'}
+                        inverted={format === 'Normal'}
+                        pagingEnabled={format === 'Normal'}
+                        initialNumToRender={images.length}
+                        renderItem={({ item }) => {
+                            return (
+                                <Animated.View style={{ flex: 1, minWidth: MAX_WIDTH, minHeight: MAX_HEIGHT }}>
+                                    <Image
+                                        transition={100}
+                                        source={storedData ? `${downloadDirectory}/${item}` : `${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${hash}/${item}`}
+                                        style={{ width: '100%', height: '100%' }}
+                                        contentFit='contain' />
+                                </Animated.View>
+
+                            )
+                        }} />
+                </View>
+            </Zoom>
+            {format === 'Normal' &&
+                <>
+                    <Animated.View style={[styles.pagination, paginationStyle]}>
+                        <TouchableNativeFeedback
+                            background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
+                            useForeground={true}
+                            onPress={() => flatListRef.current?.scrollToIndex({ animated: true, index: 0 })}
+                        >
+                            <View style={[styles.paginationButton, styles.paginationButtonFirst]}>
+                                <Ionicons name="play-skip-forward-outline" size={24} color={Theme.colors.midGray} />
+                            </View>
+                        </TouchableNativeFeedback>
+                        <GestureDetector gesture={panGesture}>
+                            <Animated.View
+                                style={styles.sliderTrack}>
+                                <View style={styles.dotContainer}>
+                                    {images.map((_, index) => (
+                                        <Animated.View
+                                            key={index}
+                                            style={[styles.dot, animatedDotStyle(index)]}
+                                        />
+                                    ))}
+                                </View>
+                                <Animated.View style={[styles.sliderThumb, sliderStyle]}>
+                                    <Text style={styles.sliderThumbText}>{currentPage}</Text>
+                                </Animated.View>
+                            </Animated.View>
+                        </GestureDetector>
+                        <TouchableNativeFeedback
+                            background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
+                            useForeground={true}
+                            onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}
+
+                        >
+                            <View style={[styles.paginationButton, styles.paginationButtonLast]}>
+                                <Ionicons name="play-skip-forward-outline" size={24} color={Theme.colors.midGray} />
+                            </View>
+                        </TouchableNativeFeedback>
+                    </Animated.View>
+                    <Animated.View style={[styles.pageNumber, pageNumberStyle]}>
+                        <Text style={styles.pageNumberText}>{`${currentPage} / ${imagesLength}`}</Text>
+                    </Animated.View>
+                </>
+            }
+        </GestureHandlerRootView>
+    )
+}
