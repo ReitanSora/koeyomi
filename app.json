@@ -2,7 +2,8 @@
   "expo": {
     "name": "Koeyomi",
     "slug": "koeyomi",
-    "version": "0.1.2",
+    "scheme": "koeyomi",
+    "version": "0.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "ios": {
@@ -18,12 +19,7 @@
         "monochromeImage": "./assets/icons/android-adaptive-icon.png",
         "backgroundColor": "#1E1E1E"
       },
-      "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"],
       "package": "com.reitansora.koeyomi"
     },
     "web": {
@@ -49,8 +45,12 @@
           "imageWidth": 200,
           "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-router"
     ],
+    "experiments": {
+      "typedRoutes": true
+    },
     "extra": {
       "eas": {
         "projectId": "cd48f66c-165f-4cea-a674-fa3db320bacd"
