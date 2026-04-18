@@ -1,17 +1,18 @@
 # 📚 KoeYomi
-KoeYomi is a mobile manga reader built with **Expo + React Native** that focuses on smooth reading, offline chapter downloads, and local persistence with SQLite.
+KoeYomi is a mobile manga reader built with **Expo + React Native** focused on a smooth reading experience, offline chapter downloads, and local persistence with SQLite.
 
 ## 🧭 Table of Contents
 - [✨ Features](#-features)
 - [🧱 Tech Stack](#-tech-stack)
 - [🏗️ Architecture](#️-architecture)
-- [📁 Project Structure](#-project-structure)
+- [🗂️ Project Structure](#️-project-structure)
 - [🚀 Getting Started](#-getting-started)
 - [⚙️ Environment Variables](#️-environment-variables)
+- [🛣️ App Routes](#️-app-routes)
 - [📜 Available Scripts](#-available-scripts)
-- [📦 Build & Release (EAS)](#-build--release-eas)
 - [🗄️ Local Database Schema](#️-local-database-schema)
 - [🌐 Backend Contract](#-backend-contract)
+- [📦 Build & Release (EAS)](#-build--release-eas)
 - [⚠️ Known Limitations](#️-known-limitations)
 - [🛠️ Troubleshooting](#️-troubleshooting)
 - [🧪 Quality & Testing](#-quality--testing)
@@ -22,13 +23,13 @@ KoeYomi is a mobile manga reader built with **Expo + React Native** that focuses
 ## ✨ Features
 - 🔎 Search manga titles through a backend connected to MangaDex.
 - 📖 Open manga details with title, status, author, genres, and synopsis.
-- 🌍 Switch chapter language between available translations (currently `en` and `es-la` in UI logic).
-- ❤️ Save/remove favorites locally.
+- 🌍 Switch chapter language between available translations (`en`, `es-la` in current UI logic).
+- ❤️ Save and remove favorites locally.
 - 📥 Download chapters for offline reading.
-- 🧠 Persist reading progress (`last_page_read`) per chapter.
+- 🧠 Persist reading progress per chapter (`last_page_read`).
 - 🕘 Track reading history with timestamps.
-- 🔍 Reader gestures: single tap UI toggle, pinch-to-zoom, pan, and double-tap zoom.
-- 🎞️ Supports two reading modes based on manga format:
+- 🔍 Reader gestures: single-tap UI toggle, pinch-to-zoom, pan, and double-tap zoom.
+- 🎞️ Two reading modes:
   - `Normal`: horizontal, right-to-left navigation.
   - `Long Strip`: vertical scrolling.
 
@@ -36,69 +37,73 @@ KoeYomi is a mobile manga reader built with **Expo + React Native** that focuses
 - ⚛️ React 19
 - 📱 React Native 0.83
 - 🚀 Expo SDK 55
-- 🧭 React Navigation (Bottom Tabs + Native Stack)
+- 🧭 Expo Router (file-based routing)
 - 🗃️ Expo SQLite
-- 🎬 Reanimated + Gesture Handler
+- 🎬 React Native Reanimated + Gesture Handler
 - 🖼️ Expo Image
-- 🛜 Custom typed `fetcher` service for API requests
+- 🛜 Typed `fetcher` service for API communication
 
 ## 🏗️ Architecture
 ### App bootstrap
-- `App.tsx` initializes:
-  - global UI shell + status bar
-  - `SQLiteProvider` with `useSuspense`
-  - DB schema creation on startup (`users`, `mangas`, `chapters`, `favorites`, `downloads`, `records`)
+The app is initialized in `src/app/_layout.tsx`:
+- Prevents/hides splash screen at startup.
+- Initializes SQLite schema through `SQLiteProvider`.
+- Creates tab navigation using `expo-router` `Tabs`.
 
 ### Navigation
-- `routes/Navigation.tsx` defines:
-  - Bottom tabs: `Home`, `Search`, `History`, `Settings`
-  - Nested stacks for details and reader flows
+Navigation is file-based with `expo-router`:
+- Root tabs in `src/app/_layout.tsx`
+- Home stack group in `src/app/(home)/_layout.tsx`
+- Detail and reader screens are nested under `(home)`
 
 ### Data flow
-1. UI calls `fetcher` with backend endpoints.
-2. Data is cached/persisted in SQLite.
-3. Screens read from SQLite first, then fetch/refresh when needed.
-4. Reader updates progress/history on chapter open and page changes.
+1. Screens request data through `src/services/fetcher.ts`.
+2. Data is cached/persisted in SQLite (`mangas`, `chapters`, etc.).
+3. UI reads local data first, then fetches updates when needed.
+4. Reader updates history and progress while reading.
 
-## 📁 Project Structure
+## 🗂️ Project Structure
 ```text
 koeyomi/
-├─ App.tsx
-├─ index.ts
-├─ app.json
-├─ eas.json
-├─ package.json
 ├─ assets/
 │  ├─ icons/
 │  └─ splash/
-├─ components/
-│  ├─ Accordion/
-│  ├─ Carousel/
-│  ├─ ChapterItem/
-│  ├─ Flags/
-│  ├─ Header/
-│  ├─ HeaderBackButton/
-│  ├─ Toast/
-│  └─ Zoom/
-├─ constants/
-├─ interfaces/
-├─ routes/
-├─ screens/
-│  ├─ HomeScreen/
-│  ├─ SearchScreen/
-│  ├─ MangaDetailsScreen/
-│  ├─ MangaReaderScreen/
-│  ├─ HistoryScreen/
-│  └─ SettingsScreen/
-├─ services/
-└─ theme/
+├─ src/
+│  ├─ app/
+│  │  ├─ (home)/
+│  │  │  ├─ _layout.tsx
+│  │  │  ├─ index.tsx
+│  │  │  ├─ manga.tsx
+│  │  │  └─ reader.tsx
+│  │  ├─ _layout.tsx
+│  │  ├─ history.tsx
+│  │  ├─ search.tsx
+│  │  └─ settings.tsx
+│  ├─ components/
+│  │  ├─ Accordion/
+│  │  ├─ Carousel/
+│  │  ├─ ChapterItem/
+│  │  ├─ Flags/
+│  │  ├─ Header/
+│  │  ├─ HeaderBackButton/
+│  │  ├─ Toast/
+│  │  └─ Zoom/
+│  ├─ services/
+│  │  └─ fetcher.ts
+│  ├─ types/
+│  │  └─ Chapter.ts
+│  ├─ Constants.ts
+│  └─ Theme.ts
+├─ app.json
+├─ eas.json
+├─ package.json
+└─ tsconfig.json
 ```
 
 ## 🚀 Getting Started
 ### Prerequisites
 - Node.js (recommended LTS, `>=20`)
 - npm
-- Expo CLI (via `npx`)
 - Android Studio + emulator/device (recommended primary target)
 - EAS CLI (optional, for cloud builds)
 
@@ -107,8 +112,13 @@ koeyomi/
 npm install
 ```
 
+### Run in development
+```bash
+npm run start
+```
+
 ## ⚙️ Environment Variables
-Create a `.env` file in the project root:
+Create `.env` or `.env.local` in the project root:
 
 ```env
 EXPO_PUBLIC_KOEYOMI_BACKEND=https://your-backend-domain.com
@@ -117,39 +127,37 @@ EXPO_PUBLIC_MYANIMELIST_BASE_URL=https://myanimelist.net
 ```
 
 Notes:
-- `EXPO_PUBLIC_KOEYOMI_BACKEND` must expose the endpoints documented below.
-- `EXPO_PUBLIC_MANGADEX_UPLOADS` is used for chapter image URLs.
-- `EXPO_PUBLIC_MYANIMELIST_BASE_URL` is used to open external manga references.
+- `EXPO_PUBLIC_KOEYOMI_BACKEND` is required for search/manga/chapter endpoints.
+- `EXPO_PUBLIC_MANGADEX_UPLOADS` is used to load chapter images.
+- `EXPO_PUBLIC_MYANIMELIST_BASE_URL` is used for external manga links.
+
+## 🛣️ App Routes
+- `/(home)` → Home (library)
+- `/(home)/manga?id=<mangaId>` → Manga details
+- `/(home)/reader?id=<chapterId>&format=<format>&title=<title>&subtitle=<subtitle>` → Reader
+- `/search` → Search screen
+- `/history` → Reading history
+- `/settings` → Settings (currently placeholder)
 
 ## 📜 Available Scripts
 ```bash
-npm run start    # Expo dev server
-npm run android  # Native Android run
-npm run ios      # Native iOS run
-npm run web      # Web preview
-```
-
-## 📦 Build & Release (EAS)
-This project includes `development`, `preview`, and `production` profiles in `eas.json`.
-
-```bash
-npx eas login
-npx eas build --platform android --profile development
-npx eas build --platform android --profile preview
-npx eas build --platform android --profile production
+npm run start    # Start Expo dev server
+npm run android  # Run Android native project
+npm run ios      # Run iOS native project
+npm run web      # Run web build in dev mode
 ```
 
 ## 🗄️ Local Database Schema
-Initialized in `App.tsx`:
+Initialized in `src/app/_layout.tsx`.
 
 - `users`: local user identity.
-- `mangas`: manga metadata + relationships + cover URL.
+- `mangas`: manga metadata and cover URL.
 - `chapters`: chapter metadata, download status, local path, last page read.
 - `favorites`: user ↔ manga relation.
 - `downloads`: user ↔ chapter download records.
 - `records`: user ↔ chapter reading history.
 
-Indexes are created for manga/chapter lookup and relation tables.
+Indexes are created for common lookup and relation columns.
 
 ## 🌐 Backend Contract
 The app expects these backend routes:
@@ -159,9 +167,19 @@ The app expects these backend routes:
 - `GET /mangadex/manga/:id/feed?language=<lang>`
 - `GET /mangadex/chapter/:id`
 
-Expected response behavior (high-level):
-- Manga objects include `attributes`, `relationships`, and `coverImageUrl`.
-- Chapter image response includes `chapter.hash` and `chapter.dataSaver`.
+Expected payload behavior (high-level):
+- Manga entities include `attributes`, `relationships`, and `coverImageUrl`.
+- Chapter image payload includes `chapter.hash` and `chapter.dataSaver`.
+
+## 📦 Build & Release (EAS)
+The project defines `development`, `preview`, and `production` profiles in `eas.json`.
+
+```bash
+npx eas login
+npx eas build --platform android --profile development
+npx eas build --platform android --profile preview
+npx eas build --platform android --profile production
+```
 
 ## ⚠️ Known Limitations
 - 📱 Some UI feedback uses `ToastAndroid`, so Android is currently the primary supported platform.
@@ -170,47 +188,43 @@ Expected response behavior (high-level):
 - 🧪 No dedicated lint/test scripts are defined in `package.json` yet.
 
 ## 🛠️ Troubleshooting
-- **Environment vars not loaded**
+- **Environment variables not loading**
   - Restart Expo with cache clear:
   ```bash
   npx expo start -c
   ```
-- **Backend request failures**
+- **Backend request errors**
   - Verify `EXPO_PUBLIC_KOEYOMI_BACKEND` and endpoint availability.
-- **Android build/device issues**
-  - Ensure SDK/device setup is correct and `adb` can detect your device.
-- **Chapter images fail to render**
-  - Check `EXPO_PUBLIC_MANGADEX_UPLOADS` value and backend chapter hash/dataSaver responses.
+- **Images not rendering in reader**
+  - Validate `EXPO_PUBLIC_MANGADEX_UPLOADS` and chapter hash/data payload.
+- **Android run/build issues**
+  - Confirm Android SDK setup and device detection (`adb devices`).
 
 ## 🧪 Quality & Testing
 Current state:
 - No test runner configured.
 - No lint/typecheck scripts configured.
 
-Recommended next additions:
+Suggested additions:
 - `npm run typecheck` with `tsc --noEmit`
-- `npm run lint` (ESLint + React Native/TypeScript rules)
-- Unit tests for `fetcher` and screen-level logic
+- `npm run lint` with ESLint for React Native + TypeScript
+- Unit tests for `fetcher` and data transformation logic
 
 ## 🤝 Contributing
 1. Fork the repository.
 2. Create a feature branch.
 3. Keep changes focused and documented.
-4. Add/update tests when introducing behavior changes.
+4. Add/update tests when behavior changes.
 5. Open a Pull Request with a clear summary.
 
 ### Commit Convention
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/):
-
+Use [Conventional Commits](https://www.conventionalcommits.org/):
 - `feat:` New features
 - `fix:` Bug fixes
-- `docs:` Documentation changes
-- `style:` Code style changes (formatting, semicolons, etc.)
-- `refactor:` Code refactoring
-- `test:` Adding tests
-- `chore:` Maintenance tasks
-- `perf:` Performance improvements
+- `refactor:` Internal code improvements
+- `docs:` Documentation updates
+- `test:` Test changes
+- `chore:` Tooling/maintenance
 
 ### Development Guidelines
 
