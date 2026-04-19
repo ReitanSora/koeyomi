@@ -16,7 +16,6 @@ export default function SearchScreen() {
     const [searchResults, setSearchResults] = useState<object>();
     const flatListRef = useRef(null);
     const router = useRouter();
-    const blurhash = 'L68{CzsEJ5s?Orbc}1bHEZoLW9j?';
 
     const handleSearch = async () => {
         if (searchTitle.trim().length > 0) {
@@ -97,7 +96,13 @@ export default function SearchScreen() {
                                     >
                                         <View style={styles.mangaItemContainer}>
                                             <View style={styles.mangaItemImage}>
-                                                <Image placeholder={{ blurhash }} transition={500} source={item.coverImageUrl} style={{ width: '100%', height: '100%' }} contentFit='cover'></Image>
+                                                <Image
+                                                    placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
+                                                    transition={200}
+                                                    source={item.coverImageUrl}
+                                                    style={{ width: '100%', height: '100%' }}
+                                                    contentFit='cover'
+                                                />
                                             </View>
                                             <View style={styles.mangaItemInfo}>{/*Aqui modificar el width cuando la pantalla gira a modo horizontal */}
                                                 <View style={styles.mangaItemInfoHeader}>

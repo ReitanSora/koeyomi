@@ -98,8 +98,9 @@ export default function HistoryScreen() {
                                         <View style={styles.chapterItem}>
                                             <View style={styles.imageContainer}>
                                                 <Image
-                                                    cachePolicy={'memory-disk'}
-                                                    // transition={200}
+                                                    cachePolicy={'none'}
+                                                    placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
+                                                    transition={200}
                                                     source={item.coverImageUrl}
                                                     style={{ width: '100%', height: '100%' }}
                                                     contentFit='cover'
