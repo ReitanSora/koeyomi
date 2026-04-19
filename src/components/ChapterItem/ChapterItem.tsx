@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
 import * as FileSystem from 'expo-file-system';
+import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
 import { Text, ToastAndroid, TouchableNativeFeedback, View } from "react-native";
@@ -10,7 +10,6 @@ import { Theme } from "../../Theme";
 import { ChapterImages, ChapterInfo } from "../../types/Chapter";
 import Toast from "../Toast/Toast";
 import { styles } from "./ChapterItem.styles";
-import { useRouter } from "expo-router";
 
 interface ChapterItemProps {
     item: ChapterInfo;
@@ -114,7 +113,8 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
                             id: item.id,
                             format: format,
                             title: title,
-                            subtitle: `${item.attributes.chapter} - ${item.attributes.title}`
+                            chapter: item.attributes.chapter,
+                            chapterTitle: item.attributes.title
                         }
                     });
                     setAlreadySeen(true);

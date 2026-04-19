@@ -13,7 +13,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MangaReaderScreen() {
 
-    const { id, format, title, subtitle } = useLocalSearchParams();
+    const { id, format, title, chapter, chapterTitle } = useLocalSearchParams();
     const [imagesUrl, setImagesUrl] = useState<string[]>();
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const [hasStoredData, setHasStoredData] = useState<boolean>(false);
@@ -42,21 +42,6 @@ export default function MangaReaderScreen() {
 
         return array;
     };
-
-    useEffect(() => {
-        const getImagesUrl = async () => {
-            try {
-                db.withTransactionAsync(async () => {
-                    await saveTimestamp();
-                    await getSavedImages();
-                });
-            } catch (error) {
-                Toast({ message: `Error while loading images: ${error}`, duration: ToastAndroid.SHORT })
-            }
-        }
-
-        getImagesUrl();
-    }, [])
 
     async function getSavedImages() {
         try {
@@ -119,6 +104,21 @@ export default function MangaReaderScreen() {
         }
     }
 
+    useEffect(() => {
+        const getImagesUrl = async () => {
+            try {
+                await Promise.all([
+                    saveTimestamp(),
+                    getSavedImages()
+                ])
+            } catch (error) {
+                Toast({ message: `Error while loading images: ${error}`, duration: ToastAndroid.SHORT })
+            }
+        }
+
+        getImagesUrl();
+    }, [])
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={{ flex: 1, position: 'relative' }}>
@@ -127,7 +127,7 @@ export default function MangaReaderScreen() {
                         hasFilter={false}
                         hasDownloadOption={false}
                         title={title}
-                        subtitle={subtitle}
+                        subtitle={`${chapter} ${chapterTitle ? chapterTitle: ''}`}
                         hidden={true} />
                 </Animated.View>
 
