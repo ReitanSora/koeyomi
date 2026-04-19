@@ -6,11 +6,8 @@ interface ToastProps {
 }
 
 export default function Toast({message, duration = ToastAndroid.LONG}: ToastProps) {
-    ToastAndroid.showWithGravityAndOffset(
+    ToastAndroid.show(
         message,
         duration,
-        ToastAndroid.BOTTOM,
-        25,
-        50,
     );
 };
