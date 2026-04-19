@@ -1,4 +1,5 @@
 import { Theme } from '@/Theme';
+import { Ionicons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
@@ -63,15 +64,21 @@ async function initDatabase(db: SQLiteDatabase) {
       `
         );
 
+        const deviceId = [
+            Device.brand,
+            Device.deviceYearClass,
+            Constants.deviceName
+        ].filter(Boolean).join('-') || 'unknown-device';
+
         const user = await db.getFirstAsync(
             'SELECT * FROM users WHERE id = ?',
-            `${Device.brand}-${Device.deviceYearClass}-${Constants.deviceName}-${Constants.systemVersion}`
+            `${deviceId}-${Constants.systemVersion}`
         );
 
         if (!user) {
             await db.runAsync(
                 'INSERT INTO users (id) VALUES (?)',
-                `${Device.brand}-${Device.deviceYearClass}-${Constants.deviceName}-${Constants.systemVersion}`
+                `${deviceId}-${Constants.systemVersion}`
             );
         }
     })
@@ -96,19 +103,56 @@ function RootTabs() {
                 screenOptions={{
                     tabBarStyle: {
                         display: pagesToHideTabBar.includes(page) ? 'none' : 'flex',
+                        height: 70,
                         backgroundColor: Theme.colors.gunmetalGray,
                         borderTopWidth: 0,
                         elevation: 0,
                     },
+                    tabBarItemStyle: {
+                        height: '100%',
+                        margin: 0,
+                        padding: 0,
+                    },
+                    tabBarIconStyle: {
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    },
                     tabBarActiveTintColor: Theme.colors.vermillion,
                     tabBarHideOnKeyboard: true,
+                    tabBarShowLabel: false,
                     headerShown: false,
                 }}
             >
-                <Tabs.Screen name='(home)' />
-                <Tabs.Screen name='search' />
-                <Tabs.Screen name='history' />
-                <Tabs.Screen name='settings' />
+                <Tabs.Screen
+                    name='(home)'
+                    options={{
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />,
+                        tabBarLabel: 'Home',
+
+                    }}
+                />
+                <Tabs.Screen
+                    name='search'
+                    options={{
+                        tabBarIcon: ({ color }) => <Ionicons size={24} name="search" color={color} />,
+                        tabBarLabel: 'Search'
+                    }}
+                />
+                <Tabs.Screen
+                    name='history'
+                    options={{
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "time" : "time-outline"} size={24} color={color} />,
+                        tabBarLabel: 'History'
+                    }}
+                />
+                <Tabs.Screen
+                    name='settings'
+                    options={{
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />,
+                        tabBarLabel: 'Settings'
+                    }}
+                />
             </Tabs>
         </ThemeProvider>
     )
