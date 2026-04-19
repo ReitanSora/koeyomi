@@ -159,19 +159,6 @@ function RootTabs() {
 }
 
 export default function RootLayout() {
-
-    const loaded = true;
-
-    useEffect(() => {
-        if (loaded) {
-            SplashScreen.hide();
-        }
-    }, [loaded]);
-
-    if (!loaded) {
-        return null;
-    }
-
     return (
         <Suspense
             fallback={
