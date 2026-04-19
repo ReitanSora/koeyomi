@@ -30,7 +30,6 @@ export default function MangaDetailsScreen() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const { id } = useLocalSearchParams();
 
-    const blurhash = 'L68{CzsEJ5s?Orbc}1bHEZoLW9j?';
     const db = useSQLiteContext()
 
     const handleBrowserAsync = async (id: string) => {
@@ -43,10 +42,8 @@ export default function MangaDetailsScreen() {
 
     const handleFavoriteButton = async () => {
         setIsFavorite(!isFavorite);
-        Toast({ message: !isFavorite ? 'Agregado a favoritos' : 'Eliminado de favoritos' })
-        db.withTransactionAsync(async () => {
-            await saveOrDeleteFavorite()
-        })
+        Toast({ message: !isFavorite ? 'Added to favorites' : 'Deleted from favorites' })
+        await saveOrDeleteFavorite()
     }
 
     async function getFavoriteManga() {
@@ -60,15 +57,15 @@ export default function MangaDetailsScreen() {
                 setIsFavorite(true);
             }
         } catch (error) {
-            console.log('Error get favorite manga',error)
+            console.log('Error get favorite manga', error)
         }
     }
 
     async function saveOrDeleteFavorite() {
         if (isFavorite) {
-            db.runAsync('DELETE FROM favorites WHERE manga_id = ?', [id])
+            await db.runAsync('DELETE FROM favorites WHERE manga_id = ?', [id])
         } else {
-            db.runAsync(
+            await db.runAsync(
                 'INSERT INTO favorites (user_id, manga_id) VALUES (? ,?)',
                 [
                     'Redmi-2015-2201117TL-13',
@@ -77,7 +74,6 @@ export default function MangaDetailsScreen() {
             );
         }
 
-        await db.getAllAsync('SELECT * FROM favorites');
     }
 
     async function fetchMangaChapters() {
@@ -336,27 +332,36 @@ export default function MangaDetailsScreen() {
         return savedData;
     }
 
-    const onRefresh = () => {
+    const onRefresh = async () => {
         setIsLoading(true);
-        db.withTransactionAsync(async () => {
-            await refreshMangaInfo();
-            await refreshMangaChapters();
-        })
-        setIsLoading(false);
+        try {
+            await Promise.all([
+                refreshMangaInfo(),
+                refreshMangaChapters()
+            ]);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     useEffect(() => {
-        db.withTransactionAsync(async () => {
-            await getFavoriteManga();
-            await fetchMangaInfo();
-            await fetchMangaChapters();
-        })
+        const loadData = async () => {
+            try {
+                await Promise.all([
+                    getFavoriteManga(),
+                    fetchMangaInfo(),
+                    fetchMangaChapters(),
+                ])
+            } catch (error) {
+                Toast({ message: `Error loading data ${error}` })
+            }
+        }
+
+        loadData();
     }, [])
 
     useEffect(() => {
-        db.withTransactionAsync(async () => {
-            await fetchMangaChapters();
-        })
+        fetchMangaChapters();
     }, [language])
 
     useEffect(() => {
@@ -408,7 +413,7 @@ export default function MangaDetailsScreen() {
                                     <View style={styles.mangaImage}>
                                         <Image
                                             cachePolicy={'memory-disk'}
-                                            placeholder={{ blurhash }}
+                                            placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
                                             transition={200}
                                             source={manga.coverImageUrl}
                                             style={{ width: '100%', height: '100%' }}

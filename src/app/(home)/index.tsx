@@ -18,7 +18,6 @@ export default function HomeScreen() {
     const router = useRouter();
     const SCREEN_WIDTH = useWindowDimensions().width;
     const SCREEN_HEIGHT = useWindowDimensions().height;
-    const blurhash = 'L68{CzsEJ5s?Orbc}1bHEZoLW9j?';
     const db = useSQLiteContext();
 
     async function getFavorites() {
@@ -58,18 +57,16 @@ export default function HomeScreen() {
         }
     };
 
-    const onRefresh = () => {
+    const onRefresh = async () => {
         setLoading(true);
-        db.withTransactionAsync(async () => {
-            await getFavorites();
-        })
+        await getFavorites();
         setLoading(false);
     }
 
     useEffect(() => {
-        db.withTransactionAsync(async () => {
+        (async () => {
             await getFavorites();
-        })
+        })()
     }, []);
 
     useEffect(() => {
@@ -129,7 +126,7 @@ export default function HomeScreen() {
                                     <View style={styles.mangaItem}>
                                         <Image
                                             cachePolicy={'memory-disk'}
-                                            placeholder={{ blurhash }}
+                                            placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
                                             transition={200}
                                             source={item.coverImageUrl}
                                             style={[styles.mangaItemImage, { width: '100%' }]}
