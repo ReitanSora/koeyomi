@@ -131,29 +131,42 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     }
 
     async function getLastPageRead() {
-        const lastPage = await db.getFirstAsync('SELECT * FROM chapters WHERE id = ?', [id]);
-        flatListRef.current?.scrollToIndex({ animated: false, index: parseInt(lastPage.last_page_read) });
+        try {
+            const lastPage = await db.getFirstAsync('SELECT * FROM chapters WHERE id = ?', [id]);
+            
+            if (lastPage && lastPage.last_page_read !== null) {
+                const pageIndex = parseInt(lastPage.last_page_read);
+
+                if (pageIndex >= 0 && pageIndex < images.length) {
+                    flatListRef.current?.scrollToIndex({ animated: false, index: pageIndex });
+                }
+            }
+        } catch (error) {
+            throw new Error("Error in get last page read");
+        }
     }
 
     useEffect(() => {
         try {
-            db.withTransactionAsync(async () => {
+            const loadData = async () => {
                 await getLastPageRead();
-            })
-            const instruction = format === 'Normal' ? 'Leer de derecha a izquierda' : 'Leer hacia abajo';
+            }
+            loadData();
+            const instruction = format === 'Normal' ? 'Right to left' : 'To bottom';
             Toast({ message: instruction, duration: ToastAndroid.SHORT })
         } catch (error) {
-            Toast({ message: `Error in Carousel. ${error}` })
+            Toast({ message: `${error}` })
         }
     }, [])
 
     useEffect(() => {
         try {
-            db.withTransactionAsync(async () => {
+            const loadData = async () => {
                 await updateLastPageRead();
-            })
+            }
+            loadData();
         } catch (error) {
-            Toast({ message: `Error in Carousel. ${error}` })
+            Toast({ message: `${error}` })
         }
     }, [currentPage])
 
