@@ -4,7 +4,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { Text, ToastAndroid, TouchableNativeFeedback, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { Extrapolation, interpolate, runOnJS, scrollTo, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, { Extrapolation, interpolate, scrollTo, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { MAX_HEIGHT, MAX_WIDTH } from '../../Constants';
 import { Theme } from '../../Theme';
 import Toast from '../Toast/Toast';
@@ -52,8 +53,8 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     const scrollHandler = useAnimatedScrollHandler({
         onScroll: (event) => {
             scrollX.value = event.contentOffset.x;
-            const page = Math.floor(event.contentOffset.x / MAX_WIDTH + 0.5)
-            runOnJS(setCurrentPage)(page + 1)
+            const page = ~~(~~event.contentOffset.x / ~~MAX_WIDTH)
+            scheduleOnRN(setCurrentPage, page + 1)
         },
     });
 
@@ -133,7 +134,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     async function getLastPageRead() {
         try {
             const lastPage = await db.getFirstAsync('SELECT * FROM chapters WHERE id = ?', [id]);
-            
+
             if (lastPage && lastPage.last_page_read !== null) {
                 const pageIndex = parseInt(lastPage.last_page_read);
 
@@ -177,7 +178,6 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                     <Animated.FlatList
                         ref={flatListRef}
                         onScroll={scrollHandler}
-                        scrollEventThrottle={16}
                         showsHorizontalScrollIndicator={format !== 'Normal'}
                         data={images}
                         keyExtractor={(item) => `dataSaver-${hash}-${item}`}
@@ -238,7 +238,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                             </View>
                         </TouchableNativeFeedback>
                     </Animated.View>
-                    <Animated.View style={[styles.pageNumber, pageNumberStyle]}>
+                    <Animated.View style={[styles.pageNumber,]}>
                         <Text style={styles.pageNumberText}>{`${currentPage} / ${imagesLength}`}</Text>
                     </Animated.View>
                 </>
