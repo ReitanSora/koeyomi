@@ -15,7 +15,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useState } from 'react';
 import { FlatList, RefreshControl, StyleSheet, Text, ToastAndroid, TouchableNativeFeedback, TouchableOpacity, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function MangaDetailsScreen() {
 
@@ -31,6 +31,7 @@ export default function MangaDetailsScreen() {
     const { id } = useLocalSearchParams();
 
     const db = useSQLiteContext()
+    const insets = useSafeAreaInsets();
 
     const handleBrowserAsync = async (id: string) => {
         await WebBrowser.openBrowserAsync(`${process.env.EXPO_PUBLIC_MYANIMELIST_BASE_URL}/manga/${id}`)
@@ -382,131 +383,129 @@ export default function MangaDetailsScreen() {
     }, [manga]);
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView>
-                <HeaderBackButton />
-                {manga && chapters ?
-
-                    <FlatList
-                        data={chapters}
-                        keyExtractor={(item: ChapterInfo) => `${item.id}-${item.attributes.translatedLanguage}`}
-                        initialNumToRender={30}
-                        maxToRenderPerBatch={20}
-                        windowSize={31}
-                        refreshControl={
-                            <RefreshControl
-                                refreshing={isLoading}
-                                onRefresh={onRefresh}
-                                colors={[Theme.colors.jetgray]}
-                                progressBackgroundColor={Theme.colors.midGray}
-                            />
-                        }
-                        renderItem={({ item }) => {
-                            return (
-                                <ChapterItem item={item} format={mangaFormat} title={title} />
-                            )
-                        }}
-                        style={{ height: MAX_HEIGHT - 55 }}
-                        ListHeaderComponent={
-                            <>
-                                <View style={styles.mangaHeader}>
-                                    <View style={styles.mangaImage}>
-                                        <Image
-                                            cachePolicy={'memory-disk'}
-                                            placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
-                                            transition={200}
-                                            source={manga.coverImageUrl}
-                                            style={{ width: '100%', height: '100%' }}
-                                            contentFit='cover'
-                                        />
-                                    </View>
-                                    <View style={styles.mangaInfo}>
-                                        <View style={styles.mangaTitle}>
-                                            <Text style={styles.title}>
-                                                {title}
+        <View style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}>
+            <HeaderBackButton />
+            {manga && chapters ?
+                <FlatList
+                    data={chapters}
+                    keyExtractor={(item: ChapterInfo) => `${item.id}-${item.attributes.translatedLanguage}`}
+                    initialNumToRender={30}
+                    maxToRenderPerBatch={20}
+                    windowSize={31}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={isLoading}
+                            onRefresh={onRefresh}
+                            colors={[Theme.colors.jetgray]}
+                            progressBackgroundColor={Theme.colors.midGray}
+                        />
+                    }
+                    renderItem={({ item }) => {
+                        return (
+                            <ChapterItem item={item} format={mangaFormat} title={title} />
+                        )
+                    }}
+                    style={{ height: MAX_HEIGHT - 55 }}
+                    ListHeaderComponent={
+                        <>
+                            <View style={styles.mangaHeader}>
+                                <View style={styles.mangaImage}>
+                                    <Image
+                                        cachePolicy={'memory-disk'}
+                                        placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
+                                        transition={200}
+                                        source={manga.coverImageUrl}
+                                        style={{ width: '100%', height: '100%' }}
+                                        contentFit='cover'
+                                    />
+                                </View>
+                                <View style={styles.mangaInfo}>
+                                    <View style={styles.mangaTitle}>
+                                        <Text style={styles.title}>
+                                            {title}
+                                        </Text>
+                                        <View style={styles.author}>
+                                            <Ionicons name="person-circle-outline" size={15} color={Theme.colors.midGray} />
+                                            <Text style={styles.authorText}>
+                                                {manga.relationships.find((item) => item.type === 'author').attributes.name}
                                             </Text>
-                                            <View style={styles.author}>
-                                                <Ionicons name="person-circle-outline" size={15} color={Theme.colors.midGray} />
-                                                <Text style={styles.authorText}>
-                                                    {manga.relationships.find((item) => item.type === 'author').attributes.name}
-                                                </Text>
-                                            </View>
-                                            <View style={styles.status}>
-                                                {manga.attributes.status === 'completed' ?
-                                                    <Ionicons
-                                                        name="checkmark-done-circle-outline"
-                                                        size={15}
-                                                        color={Theme.colors.midGray} /> :
-                                                    <MaterialCommunityIcons
-                                                        name="record-circle-outline"
-                                                        size={15}
-                                                        color={Theme.colors.vermillion} />
-                                                }
-                                                <Text
-                                                    style={[styles.statusText, manga.attributes.status === 'completed' ? { color: Theme.colors.midGray } : { color: Theme.colors.vermillion }]}>
-                                                    {manga.attributes.status === 'ongoing' ? 'En Curso' : 'Finalizado'}
-                                                </Text>
-                                            </View>
                                         </View>
-                                        <View style={styles.mangaGenres}>
-                                            {manga.attributes.tags.filter(tag => tag.attributes?.group === 'genre').map((tag) => {
-                                                return (
-                                                    <View style={styles.genre} key={`${manga.id}-genre-${tag.attributes.name.en}`}>
-                                                        <Text numberOfLines={1} style={styles.genreText}>{tag.attributes.name.en}</Text>
-                                                    </View>
-                                                )
-                                            })}
-                                        </View>
-                                        <View style={styles.mangaOptions}>
-                                            <TouchableOpacity onPress={handleFavoriteButton}>
-                                                <View style={[styles.button, isFavorite && { borderColor: Theme.colors.vermillion }]}>
-                                                    {isFavorite
-                                                        ? <MaterialCommunityIcons name="heart-multiple" size={18} color={Theme.colors.vermillion} />
-                                                        : <MaterialCommunityIcons name="heart-multiple-outline" size={18} color={Theme.colors.midGray} />
-                                                    }
-                                                </View>
-                                            </TouchableOpacity>
-                                            <TouchableOpacity onPress={() => handleBrowserAsync(manga.attributes.links.mal)}>
-                                                <View style={[styles.button]}>
-                                                    <Ionicons name="planet-outline" size={18} color={Theme.colors.midGray} />
-                                                </View>
-                                            </TouchableOpacity>
+                                        <View style={styles.status}>
+                                            {manga.attributes.status === 'completed' ?
+                                                <Ionicons
+                                                    name="checkmark-done-circle-outline"
+                                                    size={15}
+                                                    color={Theme.colors.midGray} /> :
+                                                <MaterialCommunityIcons
+                                                    name="record-circle-outline"
+                                                    size={15}
+                                                    color={Theme.colors.vermillion} />
+                                            }
+                                            <Text
+                                                style={[styles.statusText, manga.attributes.status === 'completed' ? { color: Theme.colors.midGray } : { color: Theme.colors.vermillion }]}>
+                                                {manga.attributes.status === 'ongoing' ? 'En Curso' : 'Finalizado'}
+                                            </Text>
                                         </View>
                                     </View>
-                                </View>
-                                <View style={styles.mangaDescription}>
-                                    <Accordion content={manga.attributes.description['es-la'] ? manga.attributes.description['es-la'] : manga.attributes.description.en}></Accordion>
-                                </View>
-                                <View style={styles.languageSelector}>
-                                    {availableLanguages?.map(item => {
-                                        return (
-                                            <View
-                                                style={{ borderTopEndRadius: Theme.borders.cardItem, borderTopStartRadius: Theme.borders.cardItem, overflow: 'hidden' }}
-                                                key={`languageOption-${item}`}
-                                            >
-                                                <TouchableNativeFeedback
-                                                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
-                                                    useForeground={true}
-                                                    onPress={() => handleLanguageSelector(item)}
-                                                >
-                                                    <Animated.View
-                                                        style={[styles.languageItem, language === item ? { backgroundColor: Theme.colors.jetgray } : { opacity: 0.4 }]}
-                                                    >
-                                                        <Text style={styles.languageText}>{`${item.toUpperCase()}`}</Text>
-                                                        {item === 'en' ? <UnitedStatesFlag width={16} /> : <MexicoFlag width={16} />}
-                                                    </Animated.View>
-                                                </TouchableNativeFeedback>
+                                    <View style={styles.mangaGenres}>
+                                        {manga.attributes.tags.filter(tag => tag.attributes?.group === 'genre').map((tag) => {
+                                            return (
+                                                <View style={styles.genre} key={`${manga.id}-genre-${tag.attributes.name.en}`}>
+                                                    <Text numberOfLines={1} style={styles.genreText}>{tag.attributes.name.en}</Text>
+                                                </View>
+                                            )
+                                        })}
+                                    </View>
+                                    <View style={styles.mangaOptions}>
+                                        <TouchableOpacity onPress={handleFavoriteButton}>
+                                            <View style={[styles.button, isFavorite && { borderColor: Theme.colors.vermillion }]}>
+                                                {isFavorite
+                                                    ? <MaterialCommunityIcons name="heart-multiple" size={18} color={Theme.colors.vermillion} />
+                                                    : <MaterialCommunityIcons name="heart-multiple-outline" size={18} color={Theme.colors.midGray} />
+                                                }
                                             </View>
-                                        )
-                                    })
-                                    }
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => handleBrowserAsync(manga.attributes.links.mal)}>
+                                            <View style={[styles.button]}>
+                                                <Ionicons name="planet-outline" size={18} color={Theme.colors.midGray} />
+                                            </View>
+                                        </TouchableOpacity>
+                                    </View>
                                 </View>
-                            </>
-                        }
-                        ListFooterComponent={
-                            <>
-                                <View style={styles.mangaFooter}>
-                                    {/* {mangaFetchStatus === 'partial' &&
+                            </View>
+                            <View style={styles.mangaDescription}>
+                                <Accordion content={manga.attributes.description['es-la'] ? manga.attributes.description['es-la'] : manga.attributes.description.en}></Accordion>
+                            </View>
+                            <View style={styles.languageSelector}>
+                                {availableLanguages?.map(item => {
+                                    return (
+                                        <View
+                                            style={{ borderTopEndRadius: Theme.borders.cardItem, borderTopStartRadius: Theme.borders.cardItem, overflow: 'hidden' }}
+                                            key={`languageOption-${item}`}
+                                        >
+                                            <TouchableNativeFeedback
+                                                background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
+                                                useForeground={true}
+                                                onPress={() => handleLanguageSelector(item)}
+                                            >
+                                                <Animated.View
+                                                    style={[styles.languageItem, language === item ? { backgroundColor: Theme.colors.jetgray } : { opacity: 0.4 }]}
+                                                >
+                                                    <Text style={styles.languageText}>{`${item.toUpperCase()}`}</Text>
+                                                    {item === 'en' ? <UnitedStatesFlag width={16} /> : <MexicoFlag width={16} />}
+                                                </Animated.View>
+                                            </TouchableNativeFeedback>
+                                        </View>
+                                    )
+                                })
+                                }
+                            </View>
+                        </>
+                    }
+                    ListFooterComponent={
+                        <>
+                            <View style={styles.mangaFooter}>
+                                {/* {mangaFetchStatus === 'partial' &&
                                         <TouchableOpacity onPress={handleLimitChapter}>
                                             <View style={styles.mangaLoader}>
                                                 <Animated.View style={animatedLimit}>
@@ -516,13 +515,12 @@ export default function MangaDetailsScreen() {
                                             </View>
                                         </TouchableOpacity>
                                     } */}
-                                </View>
-                            </>
-                        }
-                    /> : <></>
-                }
-            </SafeAreaView>
-        </SafeAreaProvider>
+                            </View>
+                        </>
+                    }
+                /> : <></>
+            }
+        </View>
     );
 };
 
