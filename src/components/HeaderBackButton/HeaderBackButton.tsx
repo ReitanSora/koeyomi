@@ -1,17 +1,15 @@
 import { Ionicons, Octicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import Constants from 'expo-constants';
+import { useRouter } from "expo-router";
 import { Text, TouchableNativeFeedback, View } from "react-native";
 import { Theme } from "../../Theme";
 import { styles } from "./HeaderBackButton.styles";
-import { useRouter } from "expo-router";
 
-export default function HeaderBackButton({ title = '', subtitle = '', hasFilter = true, hasDownloadOption = true, hidden = false }) {
+export default function HeaderBackButton({ title = '', subtitle = '', hasFilter = true, hasDownloadOption = true, hidden = false, background = '' }) {
 
     const router = useRouter();
 
     return (
-        <View style={[styles.header, hidden && { position: 'absolute', top: Constants.statusBarHeight, backgroundColor: 'rgba(30,30,30,0.8)', zIndex: 1000 }]}>
+        <View style={[styles.header, hidden && { position: 'absolute', backgroundColor: background, zIndex: 1 }]}>
             <View style={styles.headerLeft}>
                 <View style={{ borderRadius: Theme.borders.circle, overflow: 'hidden' }}>
                     <TouchableNativeFeedback
