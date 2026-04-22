@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import { useRouter } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useEffect, useState } from "react";
@@ -36,33 +36,30 @@ export default function ChapterItem({ item, format, title }: ChapterItemProps) {
             setIsDownloading(true);
 
             const images = await fetcher(process.env.EXPO_PUBLIC_KOEYOMI_BACKEND, `/mangadex/chapter/${item.id}`) as ChapterImages;
-            const downloadDirectory = FileSystem.documentDirectory + `KoeYomi/${item.id}`;
+            const downloadDirectory = new Directory(Paths.document.uri + `${item.id}`)
 
-            const dirInfo = await FileSystem.getInfoAsync(downloadDirectory);
-            if (!dirInfo.exists) {
-                await FileSystem.makeDirectoryAsync(downloadDirectory, { intermediates: true });
+            if (!downloadDirectory.exists) {
+                downloadDirectory.create()
             }
 
-            await Promise.all(
+            await Promise.allSettled(
                 images.chapter.dataSaver.map(
-                    image => FileSystem.downloadAsync(
-                        `${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${images.chapter.hash}/${image}`,
-                        downloadDirectory + `/${image}`,
-                    )
+                    async (image) => {
+                        await File.downloadFileAsync(
+                            `${process.env.EXPO_PUBLIC_MANGADEX_UPLOADS}/data-saver/${images.chapter.hash}/${image}`,
+                            downloadDirectory,
+                        )
+                    }
+
                 )
             )
 
             setIsDownloaded(true);
             setIsDownloading(false);
-            db.withTransactionAsync(async () => {
-                await updateChapterInfo(true, downloadDirectory);
-            })
+            await updateChapterInfo(true, downloadDirectory.uri);
         } catch (error) {
-            Toast({ message: `Error while downloading chapter: ${error}`, duration: ToastAndroid.SHORT })
-            db.withTransactionAsync(async () => {
-                await updateChapterInfo(false, '');
-            })
-            console.log(error)
+            Toast({ message: `Error downloading chapter: ${error}`, duration: ToastAndroid.SHORT })
+            await updateChapterInfo(false, '');
             setIsDownloaded(false);
             setIsDownloading(false);
         }
