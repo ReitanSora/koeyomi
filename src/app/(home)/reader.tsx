@@ -1,15 +1,14 @@
 import Carousel from '@/components/Carousel/Carousel';
 import HeaderBackButton from '@/components/HeaderBackButton/HeaderBackButton';
 import Toast from '@/components/Toast/Toast';
-import { MAX_HEIGHT, MAX_WIDTH } from '@/Constants';
+import { MAX_HEIGHT, MAX_WIDTH, statusBarHeight } from '@/Constants';
 import { fetcher } from '@/services/fetcher';
-import * as FileSystem from 'expo-file-system';
+import { Directory } from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { StyleSheet, ToastAndroid } from 'react-native';
+import { StatusBar, StyleSheet, ToastAndroid, View } from 'react-native';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 export default function MangaReaderScreen() {
 
@@ -19,6 +18,7 @@ export default function MangaReaderScreen() {
     const [hasStoredData, setHasStoredData] = useState<boolean>(false);
     const [hash, setHash] = useState<string>('');
     const [downloadDirectory, setDownloadDirectory] = useState<string>('');
+    const subtitle = chapter + (chapterTitle ? ` - ${chapterTitle}`: '');
 
     const db = useSQLiteContext();
 
@@ -53,13 +53,11 @@ export default function MangaReaderScreen() {
 
             if (savedImages.file_path) {
                 setDownloadDirectory(savedImages.file_path)
-                const directoryInfo = await FileSystem.getInfoAsync(savedImages.file_path);
+                const directoryInfo = new Directory(savedImages.file_path)
                 if (directoryInfo.exists) {
-                    const directoryContent = await FileSystem.readDirectoryAsync(savedImages.file_path);
                     setHasStoredData(true);
-                    orderSavedImages(directoryContent);
                     setHash('nohash');
-                    setImagesUrl(directoryContent);
+                    setImagesUrl(directoryInfo.info().files);
                 }
             } else {
                 const images = await fetcher(process.env.EXPO_PUBLIC_KOEYOMI_BACKEND, `/mangadex/chapter/${id}`) as object;
@@ -120,21 +118,25 @@ export default function MangaReaderScreen() {
     }, [])
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={{ flex: 1, position: 'relative' }}>
-                <Animated.View style={[styles.header, headerStyle]}>
+        <>
+            <StatusBar hidden={!isMenuVisible}/>
+            <Animated.View style={[headerStyle, { position: 'absolute', width: '100%', height: statusBarHeight, backgroundColor: 'rgba(54, 54, 54, 0.8)', zIndex: 1 }]} />
+            <View style={{ flex: 1, }}>
+                <Animated.View style={[styles.header, headerStyle, { top: statusBarHeight }]}>
                     <HeaderBackButton
                         hasFilter={false}
                         hasDownloadOption={false}
                         title={title}
-                        subtitle={`${chapter} ${chapterTitle ? chapterTitle: ''}`}
-                        hidden={true} />
+                        subtitle={subtitle}
+                        hidden={true}
+                        background='rgba(54, 54, 54, 0.8)'
+                    />
                 </Animated.View>
 
                 {imagesUrl &&
                     <Carousel
                         id={id}
-                        images={imagesUrl}
+                        images={orderSavedImages(imagesUrl)}
                         hash={hash}
                         format={format}
                         onSingleTap={() => setIsMenuVisible(!isMenuVisible)}
@@ -144,19 +146,16 @@ export default function MangaReaderScreen() {
                     />
                 }
 
-            </SafeAreaView>
-        </SafeAreaProvider>
+            </View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
     header: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
         width: '100%',
 
-        zIndex: 1000,
+        zIndex: 1,
     },
     imageWraper: {
         flex: 1,
