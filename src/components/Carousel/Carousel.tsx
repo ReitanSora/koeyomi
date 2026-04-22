@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { Text, ToastAndroid, TouchableNativeFeedback, View } from 'react-native';
+import { StyleSheet, Text, ToastAndroid, TouchableNativeFeedback, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { Extrapolation, interpolate, scrollTo, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -10,7 +10,7 @@ import { MAX_HEIGHT, MAX_WIDTH } from '../../Constants';
 import { Theme } from '../../Theme';
 import Toast from '../Toast/Toast';
 import Zoom from '../Zoom/Zoom';
-import { styles } from './Carousel.styles';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface CarouselProps {
     id: string;
@@ -32,19 +32,19 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     const [currentPage, setCurrentPage] = useState(1);
 
     const db = useSQLiteContext();
+    const insets = useSafeAreaInsets();
 
     const panGesture = Gesture.Pan()
         .onUpdate((e) => {
             const trackPosition = (MAX_WIDTH - (MAX_WIDTH * 0.65)) / 2;
             const newPos = e.absoluteX - trackPosition - THUMB_WITH / 2;
-            const currentPage = Math.floor(
-                interpolate(
-                    newPos,
-                    [(MAX_WIDTH * 0.65), 0],
-                    [imagesLength, 0],
-                    Extrapolation.CLAMP
-                )
-            );
+            const rawPage = interpolate(
+                newPos,
+                [(MAX_WIDTH * 0.65), 0],
+                [imagesLength, 0],
+                Extrapolation.CLAMP
+            )
+            const currentPage = Math.max(0, Math.min(imagesLength - 1, ~~(rawPage)));
 
             scrollX.value = ((imagesLength - 1) * MAX_WIDTH) - (currentPage * MAX_WIDTH);
             scrollTo(flatListRef, scrollX.value, 0, false)
@@ -77,7 +77,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
             const scale = interpolate(
                 scrollX.value,
                 inputRange,
-                [0.7, 1.2, 0.7],
+                [0.7, 1.5, 0.7],
                 Extrapolation.CLAMP
             );
 
@@ -89,13 +89,15 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     };
 
     const sliderStyle = useAnimatedStyle(() => {
+        const trackWidth = ~~(MAX_WIDTH * 0.65);
+        const maxThumbPosition = trackWidth - 40;
 
         return {
             transform: [{
                 translateX: interpolate(
                     scrollX.value,
-                    [(imagesLength - 1) * MAX_WIDTH, 0],
-                    [(MAX_WIDTH * 0.65) - THUMB_WITH - 21, 1],
+                    [~~((imagesLength - 1) * MAX_WIDTH), 0],
+                    [maxThumbPosition, 0],
                     Extrapolation.CLAMP
                 )
             }],
@@ -113,11 +115,14 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
     const pageNumberStyle = useAnimatedStyle(() => {
 
         return {
-            transform: [{
-                translateY: menuVisible
-                    ? withTiming(-100, { duration: 200 })
-                    : withTiming(-10, { duration: 200 })
-            }]
+            opacity: !menuVisible
+                ? withTiming(1, { duration: 100 })
+                : withTiming(0, { duration: 100 }),
+            // transform: [{
+            //     translateY: menuVisible
+            //         ? withTiming(-100, { duration: 200 })
+            //         : withTiming(-10, { duration: 200 })
+            // }]
         }
     })
 
@@ -201,7 +206,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
             </Zoom>
             {format === 'Normal' &&
                 <>
-                    <Animated.View style={[styles.pagination, paginationStyle]}>
+                    <Animated.View style={[styles.pagination, paginationStyle, {bottom: insets.bottom}]}>
                         <TouchableNativeFeedback
                             background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
                             useForeground={true}
@@ -218,7 +223,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                                     {images.map((_, index) => (
                                         <Animated.View
                                             key={index}
-                                            style={[styles.dot, animatedDotStyle(index)]}
+                                            style={[styles.dot, animatedDotStyle(index), imagesLength > 40 && {width: 2, borderRadius: 2}]}
                                         />
                                     ))}
                                 </View>
@@ -238,7 +243,7 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
                             </View>
                         </TouchableNativeFeedback>
                     </Animated.View>
-                    <Animated.View style={[styles.pageNumber,]}>
+                    <Animated.View style={[styles.pageNumber, pageNumberStyle, {bottom: insets.bottom}]}>
                         <Text style={styles.pageNumberText}>{`${currentPage} / ${imagesLength}`}</Text>
                     </Animated.View>
                 </>
@@ -246,3 +251,103 @@ export default function Carousel({ id, images, hash, format, onSingleTap, menuVi
         </GestureHandlerRootView>
     )
 }
+
+const styles = StyleSheet.create({
+    pagination: {
+        position: 'absolute',
+        width: (MAX_WIDTH * 0.65),
+        height: 50,
+        backgroundColor: Theme.colors.jetgray,
+        paddingHorizontal: 20,
+
+        flexDirection: 'row',
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+
+        borderRadius: 25,
+
+        transform: [{ rotate: '180deg' }],
+    },
+    paginationButton: {
+        position: 'absolute',
+
+        width: 50,
+        height: 50,
+        backgroundColor: Theme.colors.jetgray,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+
+        borderRadius: Theme.borders.circle,
+
+    },
+    paginationButtonLast: {
+        right: -60,
+    },
+    paginationButtonFirst: {
+        left: -60,
+
+        transform: [{ rotate: '180deg' }]
+    },
+    sliderTrack: {
+        width: '100%',
+        // height: 2,
+        // backgroundColor: Theme.colors.softVermillion,
+
+        // alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center',
+
+        borderRadius: 2,
+    },
+    dotContainer: {
+        width: '100%',
+
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    dot: {
+        height: 10,
+        width: 5,
+        backgroundColor: Theme.colors.vermillion,
+
+        borderRadius: 5,
+    },
+    sliderThumb: {
+        width: 40,
+        height: 40,
+        borderRadius: '100%',
+        backgroundColor: Theme.colors.vermillion,
+        position: 'absolute',
+        top: 20,
+        left: -20,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sliderThumbText: {
+        // position: 'absolute',
+
+        fontSize: Theme.fonts.subtitle,
+        fontWeight: 'bold',
+        color: Theme.colors.jetgray,
+
+        transform: [{ rotate: '180deg' }],
+    },
+    pageNumber: {
+        position: 'absolute',
+        backgroundColor: Theme.colors.gunmetalGray,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+
+        alignSelf: 'center',
+
+        borderRadius: 5,
+    },
+    pageNumberText: {
+        fontSize: Theme.fonts.tiny,
+        color: Theme.colors.midGray,
+    },
+})
