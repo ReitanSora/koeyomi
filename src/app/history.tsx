@@ -9,50 +9,46 @@ import { Image } from 'expo-image';
 import { useFocusEffect, useIsFocused } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 function RecordElement(item: Records) {
     return (
-        <View>
-            <TouchableWithoutFeedback>
-                <View style={styles.chapterItem}>
-                    <View style={styles.imageContainer}>
-                        <Image
-                            cachePolicy={'none'}
-                            placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
-                            transition={200}
-                            source={item.coverImageUrl}
-                            style={{ width: '100%', height: '100%' }}
-                            contentFit='cover'
-                        />
-                    </View>
-                    <View style={styles.infoContainer}>
-                        <Text
-                            numberOfLines={1}
-                            lineBreakMode='tail'
-                            style={styles.chapterText}>
-                            {item.chapter_attributes.title || 'Unknown Chapter Title'}
-                        </Text>
-                        <Text style={styles.chapterText}>{`Chapter ${item.chapter_attributes.chapter || 'Unknown'}`}</Text>
-                        <Text
-                            numberOfLines={1}
-                            lineBreakMode='tail'
-                            style={[styles.chapterText, { fontWeight: 'regular', color: Theme.colors.midGray }]}>
-                            {getTitle(item.manga_attributes)}
-                        </Text>
-                    </View>
-                    <View style={styles.timestampContainer}>
-                        <Ionicons
-                            name='time-outline'
-                            size={24}
-                            color={Theme.colors.midGray}
-                        />
-                        <Text style={styles.timestampText}>{`${item.formated_timestamp.toLocaleDateString()}`}</Text>
-                        <Text style={styles.timestampText}>{`${item.formated_timestamp.toLocaleTimeString()}`}</Text>
-                    </View>
-                </View>
-            </TouchableWithoutFeedback>
+        <View style={styles.chapterItem}>
+            <View style={styles.imageContainer}>
+                <Image
+                    cachePolicy={'none'}
+                    placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
+                    transition={200}
+                    source={item.coverImageUrl}
+                    style={{ width: '100%', height: '100%' }}
+                    contentFit='cover'
+                />
+            </View>
+            <View style={styles.infoContainer}>
+                <Text
+                    numberOfLines={1}
+                    lineBreakMode='tail'
+                    style={styles.chapterText}>
+                    {item.chapter_attributes.title || 'Unknown Chapter Title'}
+                </Text>
+                <Text style={styles.chapterText}>{`Chapter ${item.chapter_attributes.chapter || 'Unknown'}`}</Text>
+                <Text
+                    numberOfLines={1}
+                    lineBreakMode='tail'
+                    style={[styles.chapterText, { fontWeight: 'regular', color: Theme.colors.midGray }]}>
+                    {getTitle(item.manga_attributes)}
+                </Text>
+            </View>
+            <View style={styles.timestampContainer}>
+                <Ionicons
+                    name='time-outline'
+                    size={24}
+                    color={Theme.colors.midGray}
+                />
+                <Text style={styles.timestampText}>{`${item.formated_timestamp.toLocaleDateString()}`}</Text>
+                <Text style={styles.timestampText}>{`${item.formated_timestamp.toLocaleTimeString()}`}</Text>
+            </View>
         </View>
     );
 }

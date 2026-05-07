@@ -6,7 +6,7 @@ import { useSettings } from '@/context/appContext';
 import { Theme } from '@/theme';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { Extrapolation, interpolate, SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -64,7 +64,7 @@ function Card({ horizontal, inverted, progress }: CardProps) {
     });
 
     return (
-        <TouchableWithoutFeedback onPress={() => (progress.value = withTiming(progress.value === 0 ? 1 : 0, { duration: 1000 }))}>
+        <Pressable onPress={() => (progress.value = withTiming(progress.value === 0 ? 1 : 0, { duration: 1000 }))}>
             <View style={cardStyle.container}>
                 <View style={cardStyle.wrapper}>
                     <Animated.View style={[translationAnimation, { flex: 1, flexDirection: horizontal ? (inverted ? 'row-reverse' : 'row') : inverted ? 'column-reverse' : 'column', gap: 10 }]}>
@@ -77,7 +77,7 @@ function Card({ horizontal, inverted, progress }: CardProps) {
                     </Animated.View>
                 </View>
             </View>
-        </TouchableWithoutFeedback>
+        </Pressable>
     );
 }
 
