@@ -1,13 +1,13 @@
-import { MAX_HEIGHT } from '@/constants';
+import { MAX_HEIGHT, MAX_WIDTH } from '@/constants';
 import { Theme } from '@/theme';
 import { Manga } from '@/types/mangas';
 import type { ModalBottomSheetRef } from '@expo/ui/jetpack-compose';
-import { Box, Column, Host, ModalBottomSheet, RNHostView } from '@expo/ui/jetpack-compose';
-import { background, clip, fillMaxWidth, height, padding, Shapes, width } from '@expo/ui/jetpack-compose/modifiers';
+import { Box, Column, FilledTonalButton, FilledTonalIconButton, Host, Icon, ModalBottomSheet, RNHostView, Row, Shape, Text } from '@expo/ui/jetpack-compose';
+import { background, clip, fillMaxWidth, height, offset, padding, Shapes, width } from '@expo/ui/jetpack-compose/modifiers';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import React, { useRef, useState } from 'react';
-import { StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
+import { Text as RNText, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 import IconButton from '../ui/IconButton';
 import Pill from '../ui/Pill';
 
@@ -31,8 +31,8 @@ interface BottomSheetSectionProps {
 function BottomSheetSection({ containerStyle, InsideElement, subtitle, subtitleStyle }: BottomSheetSectionProps) {
     return (
         <View style={[{ gap: 10 }, containerStyle]}>
-            <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
-            <View style={styles.sectionContent}>{InsideElement}</View>
+            <RNText style={[styles.subtitle, subtitleStyle]}>{subtitle}</RNText>
+            <RNText style={styles.sectionContent}>{InsideElement}</RNText>
         </View>
     );
 }
@@ -97,12 +97,12 @@ export function BottomSheetInfo({ data }: BottomSheetInfoProps) {
                                 <BottomSheetSection
                                     subtitle='Description'
                                     InsideElement={
-                                        <Text
+                                        <RNText
                                             style={styles.text}
                                             numberOfLines={10}
                                             lineBreakMode='tail'>
                                             {data.attributes.description['es-la'] ?? data.attributes.description.en}
-                                        </Text>
+                                        </RNText>
                                     }
                                 />
                                 <BottomSheetSection
@@ -143,28 +143,30 @@ export function BottomSheetInfo({ data }: BottomSheetInfoProps) {
                                 <BottomSheetSection
                                     subtitle='External links'
                                     InsideElement={
-                                        <>
-                                            <IconButton
-                                                onPress={() => handleBrowserAsync(`https://myanimelist.net/manga/${data.attributes.links.mal}`)}
-                                                IconSet={Ionicons}
-                                                iconName='planet-outline'
-                                                iconColor={Theme.colors.midGray}
-                                                containerStyle={{
-                                                    borderWidth: 2,
-                                                    borderColor: Theme.colors.jetgray,
-                                                }}
-                                            />
-                                            <IconButton
-                                                onPress={() => handleBrowserAsync(data.attributes.links.raw)}
-                                                IconSet={MaterialIcons}
-                                                iconName='raw-on'
-                                                iconColor={Theme.colors.midGray}
-                                                containerStyle={{
-                                                    borderWidth: 2,
-                                                    borderColor: Theme.colors.jetgray,
-                                                }}
-                                            />
-                                        </>
+                                        <Host matchContents>
+                                            <Row horizontalArrangement={{ spacedBy: 10 }}>
+                                                <FilledTonalIconButton
+                                                    onClick={() => handleBrowserAsync(`https://myanimelist.net/manga/${data.attributes.links.mal}`)}
+                                                    modifiers={[width(48), height(48)]}
+                                                    colors={{ containerColor: Theme.colors.jetgray }}
+                                                    shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                                    <Icon
+                                                        source={require('../../../assets/icons/browser.png')}
+                                                        size={24}
+                                                        tint={Theme.colors.midGray}></Icon>
+                                                </FilledTonalIconButton>
+                                                <FilledTonalIconButton
+                                                    onClick={() => handleBrowserAsync(data.attributes.links.raw)}
+                                                    modifiers={[width(48), height(48)]}
+                                                    colors={{ containerColor: Theme.colors.jetgray }}
+                                                    shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                                    <Icon
+                                                        source={require('../../../assets/icons/raw.png')}
+                                                        size={24}
+                                                        tint={Theme.colors.midGray}></Icon>
+                                                </FilledTonalIconButton>
+                                            </Row>
+                                        </Host>
                                     }
                                 />
                             </View>
@@ -207,23 +209,21 @@ export function BottomSheetFilter({ children, onReset, heightDivider }: BottomSh
                     </ModalBottomSheet.DragHandle>
                     <Column modifiers={[height(~~MAX_HEIGHT / heightDivider)]}>
                         <RNHostView>
-                            <View style={{ height: '100%', paddingTop: 20, gap: 20 }}>
-                                {children}
-                                <View style={styles.filterOptions}>
-                                    <IconButton
-                                        onPress={handleReset}
-                                        containerStyle={{ flex: 1 }}
-                                        insideStyle={{
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: 10,
-                                        }}
-                                        InsideElement={<Text style={[styles.subtitle, { color: Theme.colors.midGray }]}>Reset</Text>}
-                                    />
-                                </View>
-                            </View>
+                            <View style={{ height: '100%', paddingTop: 20, gap: 20 }}>{children}</View>
                         </RNHostView>
+                    </Column>
+                    <Column modifiers={[fillMaxWidth(), height(48), padding(20, 0, 20, 0), offset(0, -10)]}>
+                        <FilledTonalButton
+                            onClick={handleReset}
+                            modifiers={[width(~~MAX_WIDTH - 40), height(48)]}
+                            colors={{ containerColor: Theme.colors.gunmetalGray }}
+                            shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                            <Text
+                                style={{ fontSize: Theme.fonts.subtitle, fontWeight: 'bold' }}
+                                color={Theme.colors.midGray}>
+                                Reset
+                            </Text>
+                        </FilledTonalButton>
                     </Column>
                 </ModalBottomSheet>
             )}
