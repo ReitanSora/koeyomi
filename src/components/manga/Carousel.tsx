@@ -205,7 +205,7 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                     IconSet={Ionicons}
                     iconName='play-skip-back-outline'
                     iconColor={Theme.colors.midGray}
-                    containerStyle={{ position: 'absolute', left: -60, backgroundColor: Theme.colors.jetgray }}
+                    containerStyle={{ position: 'absolute', left: -55, backgroundColor: Theme.colors.jetgray }}
                 />
                 <GestureDetector gesture={panGesture}>
                     <Animated.View style={styles.sliderTrack}>
@@ -227,7 +227,7 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                     IconSet={Ionicons}
                     iconName='play-skip-forward-outline'
                     iconColor={Theme.colors.midGray}
-                    containerStyle={{ position: 'absolute', right: -60, backgroundColor: Theme.colors.jetgray }}
+                    containerStyle={{ position: 'absolute', right: -55, backgroundColor: Theme.colors.jetgray }}
                 />
             </Animated.View>
             <Animated.View style={[styles.pageNumber, pageNumberStyle, { bottom: insets.bottom }]}>
