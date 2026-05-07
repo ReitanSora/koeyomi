@@ -1,9 +1,4 @@
-export const fetcher = async <T>(
-    base_url: string,
-    endpoint: string,
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET',
-    body?: object,
-): Promise<T> => {
+export const fetcher = async <T>(base_url: string, endpoint: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' = 'GET', body?: object): Promise<T> => {
     const options: RequestInit = {
         method,
         headers: {
@@ -28,7 +23,7 @@ export const fetcher = async <T>(
             }
             throw new Error(errorData.message || 'Request error');
         }
-        
+
         let result;
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
