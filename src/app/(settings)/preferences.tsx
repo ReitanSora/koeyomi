@@ -142,8 +142,7 @@ export default function Preferences() {
                 onLeftActionPress={() => router.back()}
                 title='Preferences'
             />
-            <ScrollView
-                showsVerticalScrollIndicator={false}>
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.content}>
                     <PreferenceSection title='General'>
                         <View style={styles.description}>
@@ -153,7 +152,7 @@ export default function Preferences() {
                         <View style={styles.option}>
                             <Dropdown
                                 selectedOption={selectedLanguage}
-                                setSelectedOption={(value) => setSelectedLanguage(value as 'en'| 'es-la')}
+                                setSelectedOption={(value) => setSelectedLanguage(value as 'en' | 'es-la')}
                                 options={[
                                     { label: 'English', value: 'en' },
                                     { label: 'Español', value: 'es-la' },
@@ -200,7 +199,7 @@ export default function Preferences() {
                             <Text style={[styles.text, styles.title]}>Preview:</Text>
                             <Text style={styles.text}>Press card to play preview.</Text>
                         </View>
-                        <View style={[styles.option, {paddingBottom: 20}]}>
+                        <View style={[styles.option, { paddingBottom: 20 }]}>
                             <Card
                                 horizontal={selectedReadMode === 'horizontal'}
                                 inverted={invertDirection}

@@ -40,7 +40,7 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
     const panGesture = Gesture.Pan().onUpdate((e) => {
         const trackPosition = (MAX_WIDTH - MAX_WIDTH * 0.65) / 2;
         const newPos = e.absoluteX - trackPosition - THUMB_WITH / 2;
-        const rawPage = interpolate(newPos, [0, MAX_WIDTH * 0.65], readingMode === 'horizontal' && readingDirection === 'rtl'? [0, imagesLength]:[imagesLength, 0], Extrapolation.CLAMP);
+        const rawPage = interpolate(newPos, [0, MAX_WIDTH * 0.65], readingMode === 'horizontal' && readingDirection === 'rtl' ? [0, imagesLength] : [imagesLength, 0], Extrapolation.CLAMP);
         const currentPage = Math.max(0, Math.min(imagesLength - 1, ~~rawPage));
 
         scrollX.value = (imagesLength - 1) * MAX_WIDTH - currentPage * MAX_WIDTH;
@@ -198,7 +198,7 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                     />
                 </View>
             </Zoom>
-            <Animated.View style={[styles.pagination, paginationStyle, { bottom: insets.bottom }, readingMode === 'horizontal' && readingDirection === 'rtl' && {transform: [{scaleX: -1}]}]}>
+            <Animated.View style={[styles.pagination, paginationStyle, { bottom: insets.bottom }, readingMode === 'horizontal' && readingDirection === 'rtl' && { transform: [{ scaleX: -1 }] }]}>
                 <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
                     useForeground={true}
@@ -222,7 +222,7 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                             ))}
                         </View>
                         <Animated.View style={[styles.sliderThumb, sliderStyle]}>
-                            <Text style={[styles.sliderThumbText, readingMode === 'horizontal' && readingDirection === 'rtl' && {transform: [{scaleX: -1}]}]}>{currentPage}</Text>
+                            <Text style={[styles.sliderThumbText, readingMode === 'horizontal' && readingDirection === 'rtl' && { transform: [{ scaleX: -1 }] }]}>{currentPage}</Text>
                         </Animated.View>
                     </Animated.View>
                 </GestureDetector>

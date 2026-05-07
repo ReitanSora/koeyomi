@@ -266,9 +266,7 @@ export default function SearchScreen() {
                         size={'large'}
                         color={Theme.colors.midGray}
                     />
-                    <Text style={{ width: '70%', textAlign: 'center', fontSize: Theme.fonts.paragraph, color: Theme.colors.midGray }}>
-                        Searching for your next story... please wait a moment.
-                    </Text>
+                    <Text style={{ width: '70%', textAlign: 'center', fontSize: Theme.fonts.paragraph, color: Theme.colors.midGray }}>Searching for your next story... please wait a moment.</Text>
                 </View>
             ) : (
                 <ListEmpty

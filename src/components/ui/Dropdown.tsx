@@ -1,6 +1,6 @@
 import { Theme } from '@/theme';
 import { DropdownMenu, DropdownMenuItem, Host } from '@expo/ui/jetpack-compose';
-import { align, clip, Shapes, width } from '@expo/ui/jetpack-compose/modifiers';
+import { width } from '@expo/ui/jetpack-compose/modifiers';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
@@ -19,8 +19,7 @@ export default function Dropdown({ options, selectedOption, setSelectedOption }:
     return (
         <Host
             matchContents
-            style={{ width: '100%'}}
-            >
+            style={{ width: '100%' }}>
             <DropdownMenu
                 expanded={isExpanded}
                 color={Theme.colors.jetgray}
@@ -33,7 +32,7 @@ export default function Dropdown({ options, selectedOption, setSelectedOption }:
                         iconSize={20}
                         onPress={() => setIsExpanded(true)}
                         containerStyle={{ width: '100%', borderRadius: 0 }}
-                        insideStyle={{ paddingHorizontal: 20, flexDirection: 'row-reverse',justifyContent: 'flex-end', gap: 10 }}
+                        insideStyle={{ paddingHorizontal: 20, flexDirection: 'row-reverse', justifyContent: 'flex-end', gap: 10 }}
                         InsideElement={<Text style={[styles.text, { fontWeight: 'bold' }]}>{selectedLabel}</Text>}
                     />
                 </DropdownMenu.Trigger>

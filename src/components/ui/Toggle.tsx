@@ -21,11 +21,11 @@ export default function ToggleSwitch({ checked, setChecked, colors }: ToggleSwit
                 value={checked}
                 onCheckedChange={setChecked}
                 colors={{
-                    uncheckedBorderColor: colors?.uncheckedBorderColor ?? Theme.colors.midGray  ,
-                    uncheckedThumbColor: colors?.uncheckedThumbColor ?? Theme.colors.midGray ,
-                    uncheckedTrackColor: colors?.uncheckedTrackColor ?? Theme.colors.jetgray ,
-                    checkedThumbColor: colors?.checkedThumbColor ?? Theme.colors.gunmetalGray ,
-                    checkedTrackColor: colors?.checkedTrackColor ?? Theme.colors.vermillion ,
+                    uncheckedBorderColor: colors?.uncheckedBorderColor ?? Theme.colors.midGray,
+                    uncheckedThumbColor: colors?.uncheckedThumbColor ?? Theme.colors.midGray,
+                    uncheckedTrackColor: colors?.uncheckedTrackColor ?? Theme.colors.jetgray,
+                    checkedThumbColor: colors?.checkedThumbColor ?? Theme.colors.gunmetalGray,
+                    checkedTrackColor: colors?.checkedTrackColor ?? Theme.colors.vermillion,
                 }}
             />
         </Host>

@@ -1,9 +1,9 @@
-import { MAX_WIDTH } from "@/constants";
-import { Theme } from "@/theme";
-import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TextInput, TextStyle, View, ViewStyle } from "react-native";
-import Animated, { FadeInRight } from "react-native-reanimated";
-import IconButton from "./IconButton";
+import { MAX_WIDTH } from '@/constants';
+import { Theme } from '@/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, TextInput, TextStyle, View, ViewStyle } from 'react-native';
+import Animated, { FadeInRight } from 'react-native-reanimated';
+import IconButton from './IconButton';
 
 interface HeaderProps {
     children?: React.ReactNode;
@@ -32,48 +32,53 @@ interface StaticHeaderProps {
 
 export function SearchHeader({
     isSearchBarVisible,
-    setIsSearchBarVisible = () => { },
+    setIsSearchBarVisible = () => {},
     title,
     handleFilter = undefined,
     handleSearch = undefined,
     hasSearchFilter,
     inputValue = undefined,
-    handleClose = () => { },
-    handleChangeText = () => { },
-    children
+    handleClose = () => {},
+    handleChangeText = () => {},
+    children,
 }: HeaderProps) {
     return (
         <View style={styles.header}>
             <View style={styles.headerLeft}>
-                {isSearchBarVisible ?
-                    (
-                        <Animated.View entering={FadeInRight.springify().duration(500).damping(1).stiffness(100)} style={[styles.headerSearchBarContainer, { width: MAX_WIDTH / 2 }]}>
-                            <Ionicons name="search" size={15} color={Theme.colors.midGray} />
-                            <TextInput
-                                placeholder="Search"
-                                placeholderTextColor={Theme.colors.midGray}
-                                keyboardType="default"
-                                numberOfLines={1}
-                                cursorColor={Theme.colors.vermillion}
-                                selectionColor={Theme.colors.vermillion}
-                                selectionHandleColor={Theme.colors.midGray}
-                                autoCapitalize="none"
-                                autoFocus={true}
-                                autoCorrect={false}
-                                spellCheck={false}
-                                value={!hasSearchFilter ? inputValue : undefined}
-                                onChangeText={hasSearchFilter ? handleFilter : (newText) => handleChangeText(newText)}
-                                onSubmitEditing={!hasSearchFilter ? handleSearch : undefined}
-                                style={styles.headerSearchBarInput}
-                            />
-                        </Animated.View>
-                    )
-                    :
-                    (
-                        <Animated.Text entering={FadeInRight.springify().duration(500)} style={styles.headerTitle}>
-                            {title}
-                        </Animated.Text>
-                    )}
+                {isSearchBarVisible ? (
+                    <Animated.View
+                        entering={FadeInRight.springify().duration(500).damping(1).stiffness(100)}
+                        style={[styles.headerSearchBarContainer, { width: MAX_WIDTH / 2 }]}>
+                        <Ionicons
+                            name='search'
+                            size={15}
+                            color={Theme.colors.midGray}
+                        />
+                        <TextInput
+                            placeholder='Search'
+                            placeholderTextColor={Theme.colors.midGray}
+                            keyboardType='default'
+                            numberOfLines={1}
+                            cursorColor={Theme.colors.vermillion}
+                            selectionColor={Theme.colors.vermillion}
+                            selectionHandleColor={Theme.colors.midGray}
+                            autoCapitalize='none'
+                            autoFocus={true}
+                            autoCorrect={false}
+                            spellCheck={false}
+                            value={!hasSearchFilter ? inputValue : undefined}
+                            onChangeText={hasSearchFilter ? handleFilter : (newText) => handleChangeText(newText)}
+                            onSubmitEditing={!hasSearchFilter ? handleSearch : undefined}
+                            style={styles.headerSearchBarInput}
+                        />
+                    </Animated.View>
+                ) : (
+                    <Animated.Text
+                        entering={FadeInRight.springify().duration(500)}
+                        style={styles.headerTitle}>
+                        {title}
+                    </Animated.Text>
+                )}
             </View>
             <View style={styles.headerRight}>
                 <View style={[styles.headerButtons, { flex: 1 }]}>
@@ -97,63 +102,74 @@ export function StaticHeader({ children, containerStyle, hasFilter, hasLeftActio
     return (
         <View style={[styles.header, containerStyle]}>
             <View style={[styles.headerLeft]}>
-                {hasLeftAction &&
+                {hasLeftAction && (
                     <IconButton
                         onPress={onLeftActionPress}
                         IconSet={Ionicons}
                         iconName='chevron-back'
                         iconColor={Theme.colors.lightGray}
                     />
-                }
+                )}
                 <View style={styles.headerText}>
-                    {title && <Animated.Text numberOfLines={1} lineBreakMode="tail" style={[styles.headerTextTitle, titleStyle]}>{title}</Animated.Text>}
-                    {subtitle && <Text numberOfLines={1} lineBreakMode="tail" style={styles.headerTextSubtitle}>{subtitle}</Text>}
+                    {title && (
+                        <Animated.Text
+                            numberOfLines={1}
+                            lineBreakMode='tail'
+                            style={[styles.headerTextTitle, titleStyle]}>
+                            {title}
+                        </Animated.Text>
+                    )}
+                    {subtitle && (
+                        <Text
+                            numberOfLines={1}
+                            lineBreakMode='tail'
+                            style={styles.headerTextSubtitle}>
+                            {subtitle}
+                        </Text>
+                    )}
                 </View>
             </View>
-            {hasFilter &&
+            {hasFilter && (
                 <View style={[styles.headerRight, { width: 48 }, rightHeaderStyle]}>
-                    <View style={[styles.headerButtons]}>
-                        {children}
-                    </View>
+                    <View style={[styles.headerButtons]}>{children}</View>
                 </View>
-            }
+            )}
         </View>
-    )
+    );
 }
-
 
 const styles = StyleSheet.create({
     header: {
-        width: "100%",
+        width: '100%',
         height: 55,
         // backgroundColor: '#FFF',
         paddingHorizontal: 20,
 
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         gap: 10,
     },
     headerLeft: {
         flex: 1,
         flexDirection: 'row',
-        alignItems: "center",
+        alignItems: 'center',
         justifyContent: 'flex-start',
         gap: 10,
     },
     headerSearchBarContainer: {
-        width: "auto",
+        width: 'auto',
         height: 40,
         backgroundColor: Theme.colors.jetgray,
         paddingHorizontal: 10,
 
-        flexDirection: "row",
-        justifyContent: "flex-end",
-        alignItems: "center",
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
         gap: 10,
 
-        borderRadius: Theme.borders.cardItem
+        borderRadius: Theme.borders.cardItem,
     },
     headerSearchBarInput: {
         fontSize: Theme.fonts.paragraph,
@@ -163,7 +179,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: Theme.fonts.title,
-        fontWeight: "bold",
+        fontWeight: 'bold',
         color: Theme.colors.lightGray,
     },
     headerRight: {
@@ -171,7 +187,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     headerButtons: {
-        flexDirection: "row",
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 10,

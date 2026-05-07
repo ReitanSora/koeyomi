@@ -11,15 +11,15 @@ export default function MangaItem(item: Manga) {
     const router = useRouter();
 
     return (
-        <View style={[styles.mangaItemContainer, { height: MAX_WIDTH / 2 * 1.3 }]}>
+        <View style={[styles.mangaItemContainer, { height: (MAX_WIDTH / 2) * 1.3 }]}>
             <TouchableNativeFeedback
                 background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
                 useForeground={true}
                 onPress={() => {
                     router.navigate({
                         pathname: '/(home)/manga/[mangaId]',
-                        params: { mangaId: item.id }
-                    })
+                        params: { mangaId: item.id },
+                    });
                 }}>
                 <View style={styles.mangaItem}>
                     <Image
@@ -33,15 +33,14 @@ export default function MangaItem(item: Manga) {
                     <View style={[styles.mangaItemFooter]}>
                         <Text
                             style={[styles.mangaItemTitle]}
-                            numberOfLines={1}
-                        >
+                            numberOfLines={1}>
                             {getTitle(item.attributes)}
                         </Text>
                     </View>
                 </View>
             </TouchableNativeFeedback>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -75,6 +74,6 @@ const styles = StyleSheet.create({
         flexWrap: 'nowrap',
         color: Theme.colors.white,
         textAlign: 'center',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
     },
 });

@@ -410,7 +410,7 @@ export default function MangaDetailsScreen() {
                         size={'large'}
                         color={Theme.colors.midGray}
                     />
-                    <Text style={[styles.languageText, {width: '70%',textAlign: 'center'}]}>Fetching your favorite stories... hang tight, we're gathering all the chapters for you!</Text>
+                    <Text style={[styles.languageText, { width: '70%', textAlign: 'center' }]}>Fetching your favorite stories... hang tight, we're gathering all the chapters for you!</Text>
                 </View>
             ) : (
                 manga &&
@@ -435,12 +435,12 @@ export default function MangaDetailsScreen() {
                             />
                         }
                         ListEmptyComponent={
-                        <ListEmpty
-                            description='There are no chapters available in this language. Try selecting a different language from the filters.'
-                            IconSet={MaterialCommunityIcons}
-                            iconName='book-off-outline'
-                        />
-                    }
+                            <ListEmpty
+                                description='There are no chapters available in this language. Try selecting a different language from the filters.'
+                                IconSet={MaterialCommunityIcons}
+                                iconName='book-off-outline'
+                            />
+                        }
                         renderItem={({ item }) => {
                             return (
                                 <>

@@ -231,7 +231,7 @@ function DownloadedItem({ handleAction, item, selectAll }: DownloadedItem) {
 
 export default function StorageManagerManga() {
     const [downloadedChapters, setDownloadedChapters] = useState<Array<FileSystemChapters>>([]);
-    const [selectedItems, setSelectedItems] = useState<Array<{uri: string, id:string}>>([]);
+    const [selectedItems, setSelectedItems] = useState<Array<{ uri: string; id: string }>>([]);
     const [selectAll, setSelectAll] = useState<boolean>(false);
     const db = useSQLiteContext();
     const router = useRouter();
@@ -247,28 +247,28 @@ export default function StorageManagerManga() {
         if (selectedItems.find((item) => item.id === value.id)) {
             setSelectedItems((prev) => prev.filter((item) => item.id !== value.id));
         } else {
-            setSelectedItems((prev) => [...prev, {uri: value.uri, id: value.id}]);
+            setSelectedItems((prev) => [...prev, { uri: value.uri, id: value.id }]);
         }
     };
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
         try {
             if (selectedItems.length === downloadedChapters.length) {
                 new Directory(Paths.document.uri, 'downloaded', mangaId).delete();
                 await db.runAsync('UPDATE chapters SET download_status = ?, file_path = ? WHERE manga_id = ?', ['not_downloaded', null, mangaId]);
-                setDownloadedChapters([])
-                setSelectedItems([])
+                setDownloadedChapters([]);
+                setSelectedItems([]);
                 router.back();
             } else {
-                for (const item of selectedItems){
+                for (const item of selectedItems) {
                     new Directory(item.uri).delete();
                     await db.runAsync('UPDATE chapters SET download_status = ?, file_path = ? WHERE id = ?', ['not_downloaded', null, item.id]);
                     setDownloadedChapters((prev) => prev.filter((downloaded) => downloaded.id !== item.id));
                 }
-                setSelectedItems([])
+                setSelectedItems([]);
             }
         } catch (error) {
-            Toast({message: `Error: ${error}`})
+            Toast({ message: `Error: ${error}` });
         }
     };
 

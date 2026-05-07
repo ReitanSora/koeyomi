@@ -4,13 +4,11 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
-
 interface AccordionProps {
     content: string;
 }
 
 export default function Accordion(props: AccordionProps) {
-
     const [isExpanded, setIsExpanded] = useState(false);
     const measuredHeight = useSharedValue(0);
     const animatedAccordion = useAnimatedStyle(() => {
@@ -22,14 +20,14 @@ export default function Accordion(props: AccordionProps) {
             borderTopWidth: animatedBorder,
             borderTopColor: Theme.colors.midGray,
             overflow: 'hidden',
-        }
-    })
+        };
+    });
     const animatedArrow = useAnimatedStyle(() => {
         const animatedRotate = isExpanded ? withTiming('180deg') : withTiming('0deg');
         return {
             transform: [{ rotate: animatedRotate }],
-        }
-    })
+        };
+    });
 
     return (
         <View style={styles.accordion}>
@@ -37,37 +35,35 @@ export default function Accordion(props: AccordionProps) {
                 style={{ position: 'absolute', top: 0, opacity: 0, pointerEvents: 'none' }}
                 onLayout={(event) => {
                     measuredHeight.value = event.nativeEvent.layout.height;
-                }}
-            >
-                <Text style={styles.descriptionText}>
-                    {props.content}
-                </Text>
+                }}>
+                <Text style={styles.descriptionText}>{props.content}</Text>
             </View>
             <View style={styles.accordionTrigger}>
                 <TouchableNativeFeedback
                     background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
                     useForeground={true}
-                    onPress={() => setIsExpanded(!isExpanded)}
-                >
+                    onPress={() => setIsExpanded(!isExpanded)}>
                     <View style={styles.triggerContent}>
                         <View style={styles.title}>
                             <Text style={styles.titleText}>Description</Text>
                         </View>
                         <Animated.View style={[styles.icon, animatedArrow]}>
-                            <Ionicons name="chevron-down" size={24} color={isExpanded ? Theme.colors.vermillion : Theme.colors.midGray} />
+                            <Ionicons
+                                name='chevron-down'
+                                size={24}
+                                color={isExpanded ? Theme.colors.vermillion : Theme.colors.midGray}
+                            />
                         </Animated.View>
                     </View>
                 </TouchableNativeFeedback>
             </View>
             <Animated.View style={animatedAccordion}>
                 <View style={styles.description}>
-                    <Text style={styles.descriptionText}>
-                        {props.content}
-                    </Text>
+                    <Text style={styles.descriptionText}>{props.content}</Text>
                 </View>
             </Animated.View>
         </View>
-    )
+    );
 }
 
 export const styles = StyleSheet.create({
@@ -110,14 +106,12 @@ export const styles = StyleSheet.create({
         color: Theme.colors.midGray,
     },
     icon: {},
-    accordionContent: {
-    },
-    description: {
-    },
+    accordionContent: {},
+    description: {},
     descriptionText: {
         padding: 10,
 
         fontSize: Theme.fonts.paragraph,
         color: Theme.colors.midGray,
     },
-})
+});

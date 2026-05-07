@@ -63,48 +63,37 @@ async function initDatabase(db: SQLiteDatabase) {
       CREATE INDEX IF NOT EXISTS idx_downloads_chapter_id ON downloads(chapter_id);
       CREATE INDEX IF NOT EXISTS idx_records_user_id ON records(user_id);
       CREATE INDEX IF NOT EXISTS idx_records_chapter_id ON records(chapter_id);
-      `
-        );
+      `);
 
-        const deviceId = [
-            Device.brand,
-            Device.deviceYearClass,
-            Constants.deviceName
-        ].filter(Boolean).join('-') || 'unknown-device';
+        const deviceId = [Device.brand, Device.deviceYearClass, Constants.deviceName].filter(Boolean).join('-') || 'unknown-device';
 
-        const user = await db.getFirstAsync(
-            'SELECT * FROM users WHERE id = ?',
-            `${deviceId}-${Constants.systemVersion}`
-        );
+        const user = await db.getFirstAsync('SELECT * FROM users WHERE id = ?', `${deviceId}-${Constants.systemVersion}`);
 
         if (!user) {
-            await db.runAsync(
-                'INSERT INTO users (id) VALUES (?)',
-                `${deviceId}-${Constants.systemVersion}`
-            );
+            await db.runAsync('INSERT INTO users (id) VALUES (?)', `${deviceId}-${Constants.systemVersion}`);
         }
-    })
+    });
 }
 
 function RootTabs() {
     const segment = useSegments();
-    const page = segment[segment.length - 1]
-    const pagesToHideTabBar = ['[mangaId]', 'reader', 'preferences', '(storageManager)', 'about']
-    const {isLoaded} = useSettings();
+    const page = segment[segment.length - 1];
+    const pagesToHideTabBar = ['[mangaId]', 'reader', 'preferences', '(storageManager)', 'about'];
+    const { isLoaded } = useSettings();
 
     const MyTheme = {
         ...DefaultTheme,
         colors: {
             ...DefaultTheme.colors,
-            background: Theme.colors.charcoalBlack
-        }
+            background: Theme.colors.charcoalBlack,
+        },
     };
 
     useEffect(() => {
         if (isLoaded) {
             SplashScreen.hideAsync();
         }
-    }, [isLoaded])
+    }, [isLoaded]);
 
     if (!isLoaded) {
         return null;
@@ -135,36 +124,58 @@ function RootTabs() {
                     tabBarHideOnKeyboard: true,
                     tabBarShowLabel: false,
                     headerShown: false,
-                }}
-            >
+                }}>
                 <Tabs.Screen
                     name='(home)'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
-
+                        tabBarIcon: ({ color, focused }) => (
+                            <Ionicons
+                                name={focused ? 'home' : 'home-outline'}
+                                size={24}
+                                color={color}
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name='search'
                     options={{
-                        tabBarIcon: ({ color }) => <Ionicons size={24} name="search" color={color} />
+                        tabBarIcon: ({ color }) => (
+                            <Ionicons
+                                size={24}
+                                name='search'
+                                color={color}
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name='history'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "time" : "time-outline"} size={24} color={color} />
+                        tabBarIcon: ({ color, focused }) => (
+                            <Ionicons
+                                name={focused ? 'time' : 'time-outline'}
+                                size={24}
+                                color={color}
+                            />
+                        ),
                     }}
                 />
                 <Tabs.Screen
                     name='(settings)'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
+                        tabBarIcon: ({ color, focused }) => (
+                            <Ionicons
+                                name={focused ? 'settings' : 'settings-outline'}
+                                size={24}
+                                color={color}
+                            />
+                        ),
                     }}
                 />
             </Tabs>
         </ThemeProvider>
-    )
+    );
 }
 
 export default function RootLayout() {
@@ -172,7 +183,10 @@ export default function RootLayout() {
         <Suspense
             fallback={
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <ActivityIndicator size={'large'} color={Theme.colors.vermillion} />
+                    <ActivityIndicator
+                        size={'large'}
+                        color={Theme.colors.vermillion}
+                    />
                 </View>
             }>
             <SQLiteProvider
@@ -184,5 +198,5 @@ export default function RootLayout() {
                 </SettingsProvider>
             </SQLiteProvider>
         </Suspense>
-    )
+    );
 }

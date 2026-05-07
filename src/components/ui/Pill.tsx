@@ -12,16 +12,14 @@ interface PillProps {
 export default function Pill({ containerStyle, IconElement, text, textStyle }: PillProps) {
     return (
         <>
-            {text &&
+            {text && (
                 <View style={[styles.pills, containerStyle]}>
                     {IconElement}
-                    <Text style={[styles.text, textStyle]}>
-                        {text}
-                    </Text>
+                    <Text style={[styles.text, textStyle]}>{text}</Text>
                 </View>
-            }
+            )}
         </>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -35,7 +33,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         overflow: 'hidden',
 
-        borderRadius: 20
+        borderRadius: 20,
     },
     text: {
         fontSize: Theme.fonts.paragraph,
