@@ -50,17 +50,6 @@ export default function Dropdown({ options, selectedOption, setSelectedOption }:
                                     <Text style={styles.text}>{option.label}</Text>
                                 </DropdownMenuItem.Text>
                             </DropdownMenuItem>
-                            // <IconButton
-                            //     key={`${option.label}-dropdown`}
-                            //     onPress={() => setIsExpanded(false)}
-                            //     containerStyle={{ width: '100%', borderRadius: 0 }}
-                            //     insideStyle={{ flex: 1, flexDirection: 'row-reverse', gap: 10 }}
-                            //     TextElement={
-                            //         <>
-                            //             <Text style={styles.text}>{option.label}</Text>
-                            //         </>
-                            //     }
-                            // />
                         );
                     })}
                 </DropdownMenu.Items>
