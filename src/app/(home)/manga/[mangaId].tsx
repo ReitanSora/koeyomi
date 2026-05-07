@@ -381,8 +381,15 @@ export default function MangaDetailsScreen() {
                 titleStyle={textStyle}
                 onLeftActionPress={() => router.back()}>
                 <BottomSheetFilter
-                    heightDivider={2}
+                    heightDivider={1.6}
                     onReset={handleReset}>
+                        <SegmentedControl
+                        options={availableLanguages}
+                        selectedOption={languageSelectedOption}
+                        setSelectedOption={setLanguageSelectedOption}
+                        subtitle='Language'
+                        textStyle={{ textTransform: 'uppercase' }}
+                    />
                     <SegmentedControl
                         options={sortOptions}
                         selectedOption={sortSelectedOption}
@@ -394,13 +401,6 @@ export default function MangaDetailsScreen() {
                         selectedOptions={statusSelectedOption}
                         setSelectedOptions={setStatusSelectedOption}
                         subtitle='View'
-                    />
-                    <SegmentedControl
-                        options={availableLanguages}
-                        selectedOption={languageSelectedOption}
-                        setSelectedOption={setLanguageSelectedOption}
-                        subtitle='Language'
-                        textStyle={{ textTransform: 'uppercase' }}
                     />
                 </BottomSheetFilter>
             </StaticHeader>
@@ -436,7 +436,7 @@ export default function MangaDetailsScreen() {
                         }
                         ListEmptyComponent={
                             <ListEmpty
-                                description='There are no chapters available in this language. Try selecting a different language from the filters.'
+                                description='There are no chapters available. Try selecting different filters from the modal.'
                                 IconSet={MaterialCommunityIcons}
                                 iconName='book-off-outline'
                             />
