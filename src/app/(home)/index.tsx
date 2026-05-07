@@ -1,85 +1,84 @@
-import Header from '@/components/Header/Header';
-import Toast from '@/components/Toast/Toast';
-import { Theme } from '@/Theme';
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import MangaItem from '@/components/home/MangaItem';
+import { BottomSheetFilter } from '@/components/manga/BottomSheet';
+import { SearchHeader } from '@/components/ui/Header';
+import ListEmpty from '@/components/ui/ListEmpty';
+import SegmentedControl from '@/components/ui/SegmentedControl';
+import Toast from '@/components/ui/Toast';
+import { deviceId } from '@/constants';
+import { getTitle } from '@/services/getTitle';
+import { Theme } from '@/theme';
+import { Favorites } from '@/types/favorites';
+import { Manga } from '@/types/mangas';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
-import { Dimensions, FlatList, RefreshControl, StyleSheet, Text, TouchableNativeFeedback, useWindowDimensions, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-
-    const [mangaItems, setMangaItems] = useState<[]>([]);
-    const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
-    const [filteredData, setFilteredData] = useState([]);
-    const [columns, setColumns] = useState(2);
-    const [loading, setLoading] = useState(false);
-    const router = useRouter();
-    const SCREEN_WIDTH = useWindowDimensions().width;
-    const SCREEN_HEIGHT = useWindowDimensions().height;
+    const [mangaItems, setMangaItems] = useState<Manga[]>([]);
+    const [filteredData, setFilteredData] = useState<Manga[]>([]);
+    const [isSearchBarVisible, setIsSearchBarVisible] = useState<boolean>(false);
+    const [refreshing, setRefreshing] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+    const sortOptions = ['A-Z', 'Z-A'];
+    const [sortSelectedOption, setSortSelectedOption] = useState<string>(sortOptions[0]);
     const db = useSQLiteContext();
+    const insets = useSafeAreaInsets();
 
-    async function getFavorites() {
-        try {
-            let savedMangas = [];
-            const favorites = await db.getAllAsync(
-                'SELECT * FROM favorites WHERE user_id = ?',
-                ['Redmi-2015-2201117TL-13']
-            )
-            for (const favorite of favorites) {
-                const savedData = await db.getFirstAsync(
-                    'SELECT * FROM mangas WHERE id = ?',
-                    [favorite.manga_id]
-                );
-                savedData.attributes = JSON.parse(savedData.attributes);
-                savedData.relationships = JSON.parse(savedData.relationships);
-                savedMangas.push(savedData);
-            }
-            setMangaItems(savedMangas)
-        } catch (error) {
-            Toast({ message: `Error while getting favorites: ${error}` })
+    const handleReset = () => {
+        setSortSelectedOption(sortOptions[0]);
+    };
+
+    const formatData = (data: object[], columns: number) => {
+        const numberOfFullRows = Math.floor(data.length / columns);
+        let numberOfElementsLastRow = data.length - numberOfFullRows * columns;
+
+        while (numberOfElementsLastRow !== columns && numberOfElementsLastRow !== 0) {
+            data.push({ empty: true, attributes: { title: '' } });
+            numberOfElementsLastRow++;
         }
 
-    }
+        return data as Manga[];
+    };
+
+    const getFavorites = useCallback(async () => {
+        try {
+            let savedMangas = [];
+
+            const favorites = (await db.getAllAsync('SELECT * FROM favorites WHERE user_id = ?', deviceId)) as Favorites[];
+
+            for (const favorite of favorites) {
+                const savedData = (await db.getFirstAsync('SELECT * FROM mangas WHERE id = ?', [favorite.manga_id])) as Manga;
+
+                savedData.attributes = JSON.parse(savedData.attributes.toString());
+                savedData.relationships = JSON.parse(savedData.relationships.toString());
+
+                savedMangas.push(savedData);
+            }
+            setMangaItems(savedMangas);
+            setFilteredData(savedMangas);
+            setLoading(false);
+        } catch (error) {
+            Toast({ message: `${error}` });
+            setLoading(false);
+        }
+    }, [db]);
 
     const searchFilterFunction = (text: string) => {
         if (text) {
-            const newData = mangaItems.filter(item => {
-                const title = item.attributes.title.ja || item.attributes.title.en;
-                const itemData = title.toLowerCase();
+            const newData = mangaItems.filter((item) => {
+                const title = getTitle(item.attributes);
+                const itemData = title?.toLowerCase();
                 const textData = text.toLowerCase();
                 return itemData.indexOf(textData) > -1;
-            })
+            });
             setFilteredData(newData);
         } else {
             setFilteredData(mangaItems);
         }
     };
-
-    const onRefresh = async () => {
-        setLoading(true);
-        await getFavorites();
-        setLoading(false);
-    }
-
-    useEffect(() => {
-        (async () => {
-            await getFavorites();
-        })()
-    }, []);
-
-    useEffect(() => {
-        setFilteredData(mangaItems);
-    }, [mangaItems])
-
-    Dimensions.addEventListener("change", () => {
-        if (SCREEN_WIDTH > SCREEN_HEIGHT) {
-            setColumns(2);
-        } else {
-            setColumns(5);
-        }
-    });
 
     const handleBackPress = () => {
         if (isSearchBarVisible) {
@@ -88,90 +87,110 @@ export default function HomeScreen() {
             return true;
         }
         return false;
-    }
+    };
+    // router.addListener('blur', handleBackPress)
 
     const handleCloseSearchBar = () => {
         setFilteredData(mangaItems);
-    }
+    };
 
-    // router.addListener('blur', handleBackPress)
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await getFavorites();
+        setRefreshing(false);
+    }, [getFavorites]);
+
+    useFocusEffect(
+        useCallback(() => {
+            onRefresh();
+        }, [onRefresh]),
+    );
+
+    useMemo(() => {
+        if (!filteredData) return;
+
+        const index = filteredData.findIndex((item) => item.empty);
+        if (index !== -1) filteredData.splice(index, 1);
+
+        filteredData.sort((a, b) => {
+            const aProperty = getTitle(a.attributes);
+            const bProperty = getTitle(b.attributes);
+
+            const comparison = aProperty.localeCompare(bProperty, undefined, { sensitivity: 'base' });
+            return sortSelectedOption === 'A-Z' ? comparison : -comparison;
+        });
+    }, [filteredData, sortSelectedOption]);
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.homeContainer}>
-                <Header
-                    isSearchBarVisible={isSearchBarVisible}
-                    setIsSearchBarVisible={setIsSearchBarVisible}
-                    title={'Library'}
-                    isFilterSearch={true}
-                    handleFilter={searchFilterFunction}
-                    handleClose={handleCloseSearchBar}
-                ></Header>
+        <View style={[styles.homeContainer, { paddingTop: insets.top }]}>
+            <SearchHeader
+                isSearchBarVisible={isSearchBarVisible}
+                setIsSearchBarVisible={setIsSearchBarVisible}
+                title={'Library'}
+                hasSearchFilter={true}
+                handleFilter={searchFilterFunction}
+                handleClose={handleCloseSearchBar}>
+                <BottomSheetFilter
+                    onReset={handleReset}
+                    heightDivider={3}>
+                    <SegmentedControl
+                        options={sortOptions}
+                        selectedOption={sortSelectedOption}
+                        setSelectedOption={setSortSelectedOption}
+                        subtitle='Sort'
+                    />
+                </BottomSheetFilter>
+            </SearchHeader>
+            {loading ? (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator
+                        size={'large'}
+                        color={Theme.colors.midGray}
+                    />
+                </View>
+            ) : (
                 <FlatList
-                    data={filteredData}
-                    key={columns}
+                    data={formatData(filteredData, 2)}
                     keyExtractor={(item) => item.id}
-                    renderItem={({ item }) => {
-                        return (
-                            <View style={[styles.mangaItemContainer, { width: (SCREEN_WIDTH / columns) - 15, height: ((SCREEN_WIDTH / columns) - 15) * 1.5, maxWidth: (SCREEN_WIDTH / columns) - 15 }]}>
-                                <TouchableNativeFeedback
-                                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
-                                    useForeground={true}
-                                    onPress={() => {
-                                        router.navigate({
-                                            pathname: '/(home)/manga',
-                                            params: { id: item.id }
-                                        })
-                                    }}>
-                                    <View style={styles.mangaItem}>
-                                        <Image
-                                            cachePolicy={'memory-disk'}
-                                            placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
-                                            transition={200}
-                                            source={item.coverImageUrl}
-                                            style={[styles.mangaItemImage, { width: '100%' }]}
-                                            contentFit='cover'
-                                        />
-                                        <View style={[styles.mangaItemFooter, columns > 2 ? { height: 20 } : { height: 30 }]}>
-                                            <Text
-                                                style={[styles.mangaItemTitle, columns > 2 ? { fontSize: Theme.fonts.tiny } : { fontSize: Theme.fonts.paragraph }]}
-                                                numberOfLines={1}
-                                            >
-                                                {item.attributes.title.ja !== "" ? item.attributes.title.ja : (item.attributes.title["ja-ro"] ? item.attributes.title["ja-ro"] : (item.attributes.title.en ? item.attributes.title.en : item.attributes.title["zh-ro"]))}
-                                            </Text>
-                                        </View>
-                                    </View>
-                                </TouchableNativeFeedback>
-                            </View>
-                        );
-                    }}
                     showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ width: '100%', padding: 20, paddingBottom: insets.bottom, gap: 20 }}
+                    numColumns={2}
+                    columnWrapperStyle={{ gap: 20 }}
+                    initialNumToRender={6}
+                    maxToRenderPerBatch={12}
+                    windowSize={11}
+                    removeClippedSubviews={true}
                     refreshControl={
                         <RefreshControl
-                            refreshing={loading}
+                            refreshing={refreshing}
                             onRefresh={onRefresh}
                             colors={[Theme.colors.jetgray]}
                             progressBackgroundColor={Theme.colors.midGray}
                         />
                     }
-                    style={{ flexGrow: 1 }}
-                    contentContainerStyle={styles.mangaListContainer}
-                    numColumns={columns}
-                    columnWrapperStyle={{ gap: 10 }}
-                    initialNumToRender={6}
-                    maxToRenderPerBatch={12}
-                    windowSize={10}
-                    removeClippedSubviews={true}
+                    ListEmptyComponent={
+                        <ListEmpty
+                            description='Save your favorite mangas to access them quickly from here.'
+                            IconSet={MaterialCommunityIcons}
+                            iconName='book-heart-outline'
+                        />
+                    }
+                    renderItem={({ item }) => {
+                        if (item.empty) {
+                            return <View style={{ flex: 1, backgroundColor: 'transparent' }} />;
+                        }
+                        return <MangaItem {...item} />;
+                    }}
                 />
-            </SafeAreaView>
-        </SafeAreaProvider>
+            )}
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     homeContainer: {
-        height: '100%',
-        backgroundColor: Theme.colors.charcoalBlack,
+        width: '100%',
+        flex: 1,
     },
     headerSearchBarContainer: {
         height: 'auto',
@@ -189,59 +208,11 @@ const styles = StyleSheet.create({
         fontSize: Theme.fonts.subtitle,
         color: Theme.colors.lightGray,
         width: '100%',
-        height: 40
+        height: 40,
     },
     headerTitle: {
         fontSize: Theme.fonts.title,
         fontWeight: 'bold',
         color: Theme.colors.lightGray,
-    },
-    mangaListContainer: {
-        gap: 10,
-        backgroundColor: Theme.colors.charcoalBlack,
-        padding: 10,
-        overflow: 'hidden',
-    },
-    mangaItemContainer: {
-        flex: 1,
-        borderRadius: Theme.borders.cardItem,
-        overflow: 'hidden',
-    },
-    mangaItem: {
-        flex: 1,
-    },
-    mangaItemImage: {
-        flex: 1,
-        justifyContent: 'center',
-        alignSelf: 'center',
-    },
-    mangaItemFooter: {
-        position: 'absolute',
-        bottom: 0,
-        width: '100%',
-        backgroundColor: 'rgba(54,54,54,0.8)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-        overflow: 'hidden',
-    },
-    mangaItemTitle: {
-        flexWrap: 'nowrap',
-        color: Theme.colors.white,
-        textAlign: 'center',
-        fontWeight: 'bold'
-    },
-    headerButtons: {
-        // backgroundColor: Theme.colors.vermillion,
-
-        flexDirection: 'row',
-        gap: 20,
-    },
-    circleButton: {
-        width: 40,
-        height: 40,
-
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });

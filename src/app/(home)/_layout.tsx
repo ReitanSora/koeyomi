@@ -10,7 +10,7 @@ export default function HomeLayout() {
       }}
     >
       <Stack.Screen name='index' />
-      <Stack.Screen name='manga' />
+      <Stack.Screen name='manga/[mangaId]' />
       <Stack.Screen name='reader' />
     </Stack>
   )
