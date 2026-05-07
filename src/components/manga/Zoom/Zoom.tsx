@@ -27,10 +27,13 @@ import Animated, {
   withDecay,
   withTiming,
 } from 'react-native-reanimated'
-import { MAX_SCALE, MIN_SCALE } from './constants'
 import { clampScale, getScaleFromDimensions } from './utils'
-
+import { MAX_SCALE, MIN_SCALE } from '@/constants'
 import styles from './styles'
+
+
+
+
 export type AnimationConfigProps = Parameters<typeof withTiming>[1];
 interface UseZoomGestureProps {
   animationFunction?: typeof withTiming;

@@ -1,9 +1,9 @@
+import { Theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Text, TouchableNativeFeedback, View } from 'react-native';
+import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Theme } from '../../Theme';
-import { styles } from './Accordion.styles';
+
 
 interface AccordionProps {
     content: string;
@@ -33,24 +33,25 @@ export default function Accordion(props: AccordionProps) {
 
     return (
         <View style={styles.accordion}>
-            <View style={{ position: 'absolute', top: 0, opacity: 0, pointerEvents: 'none' }}
+            <View
+                style={{ position: 'absolute', top: 0, opacity: 0, pointerEvents: 'none' }}
                 onLayout={(event) => {
                     measuredHeight.value = event.nativeEvent.layout.height;
-                }}>
+                }}
+            >
                 <Text style={styles.descriptionText}>
                     {props.content}
                 </Text>
             </View>
             <View style={styles.accordionTrigger}>
                 <TouchableNativeFeedback
-
                     background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.3)', false)}
                     useForeground={true}
                     onPress={() => setIsExpanded(!isExpanded)}
                 >
                     <View style={styles.triggerContent}>
                         <View style={styles.title}>
-                            <Text style={styles.titleText}>Sinopsis</Text>
+                            <Text style={styles.titleText}>Description</Text>
                         </View>
                         <Animated.View style={[styles.icon, animatedArrow]}>
                             <Ionicons name="chevron-down" size={24} color={isExpanded ? Theme.colors.vermillion : Theme.colors.midGray} />
@@ -58,9 +59,7 @@ export default function Accordion(props: AccordionProps) {
                     </View>
                 </TouchableNativeFeedback>
             </View>
-            <Animated.View
-                style={animatedAccordion}
-            >
+            <Animated.View style={animatedAccordion}>
                 <View style={styles.description}>
                     <Text style={styles.descriptionText}>
                         {props.content}
@@ -70,3 +69,55 @@ export default function Accordion(props: AccordionProps) {
         </View>
     )
 }
+
+export const styles = StyleSheet.create({
+    accordion: {
+        width: '100%',
+        backgroundColor: Theme.colors.jetgray,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+
+        // borderWidth: 1,
+        // borderColor: Theme.colors.midGray,
+        borderRadius: Theme.borders.cardItem,
+    },
+    accordionTrigger: {
+        height: 50,
+
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    triggerContent: {
+        width: '100%',
+        height: '100%',
+        padding: 10,
+
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    title: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    titleText: {
+        fontSize: Theme.fonts.subtitle,
+        fontWeight: 'bold',
+        lineHeight: Theme.fonts.subtitle,
+        color: Theme.colors.midGray,
+    },
+    icon: {},
+    accordionContent: {
+    },
+    description: {
+    },
+    descriptionText: {
+        padding: 10,
+
+        fontSize: Theme.fonts.paragraph,
+        color: Theme.colors.midGray,
+    },
+})
