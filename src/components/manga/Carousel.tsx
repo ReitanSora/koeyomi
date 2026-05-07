@@ -4,13 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { Extrapolation, interpolate, scrollTo, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
 import { MAX_HEIGHT, MAX_WIDTH } from '../../constants';
 import { Theme } from '../../theme';
+import IconButton from '../ui/IconButton';
 import Toast from '../ui/Toast';
 import Zoom from './Zoom/Zoom';
 
@@ -199,18 +200,13 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                 </View>
             </Zoom>
             <Animated.View style={[styles.pagination, paginationStyle, { bottom: insets.bottom }, readingMode === 'horizontal' && readingDirection === 'rtl' && { transform: [{ scaleX: -1 }] }]}>
-                <TouchableNativeFeedback
-                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
-                    useForeground={true}
-                    onPress={() => flatListRef.current?.scrollToIndex({ animated: true, index: 0 })}>
-                    <View style={[styles.paginationButton, styles.paginationButtonFirst]}>
-                        <Ionicons
-                            name='play-skip-forward-outline'
-                            size={24}
-                            color={Theme.colors.midGray}
-                        />
-                    </View>
-                </TouchableNativeFeedback>
+                <IconButton
+                    onPress={() => flatListRef.current?.scrollToIndex({ animated: true, index: 0 })}
+                    IconSet={Ionicons}
+                    iconName='play-skip-back-outline'
+                    iconColor={Theme.colors.midGray}
+                    containerStyle={{ position: 'absolute', left: -60, backgroundColor: Theme.colors.jetgray }}
+                />
                 <GestureDetector gesture={panGesture}>
                     <Animated.View style={styles.sliderTrack}>
                         <View style={styles.dotContainer}>
@@ -226,18 +222,13 @@ export default function Carousel({ id, images, hash, onSingleTap, menuVisible, s
                         </Animated.View>
                     </Animated.View>
                 </GestureDetector>
-                <TouchableNativeFeedback
-                    background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
-                    useForeground={true}
-                    onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}>
-                    <View style={[styles.paginationButton, styles.paginationButtonLast]}>
-                        <Ionicons
-                            name='play-skip-forward-outline'
-                            size={24}
-                            color={Theme.colors.midGray}
-                        />
-                    </View>
-                </TouchableNativeFeedback>
+                <IconButton
+                    onPress={() => flatListRef.current?.scrollToEnd({ animated: true })}
+                    IconSet={Ionicons}
+                    iconName='play-skip-forward-outline'
+                    iconColor={Theme.colors.midGray}
+                    containerStyle={{ position: 'absolute', right: -60, backgroundColor: Theme.colors.jetgray }}
+                />
             </Animated.View>
             <Animated.View style={[styles.pageNumber, pageNumberStyle, { bottom: insets.bottom }]}>
                 <Text style={styles.pageNumberText}>{`${currentPage} / ${imagesLength}`}</Text>
@@ -262,25 +253,14 @@ const styles = StyleSheet.create({
         borderRadius: 25,
     },
     paginationButton: {
-        position: 'absolute',
-
         width: 50,
         height: 50,
-        backgroundColor: Theme.colors.jetgray,
 
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
 
         borderRadius: Theme.borders.circle,
-    },
-    paginationButtonLast: {
-        right: -60,
-    },
-    paginationButtonFirst: {
-        left: -60,
-
-        transform: [{ rotate: '180deg' }],
     },
     sliderTrack: {
         width: '100%',
