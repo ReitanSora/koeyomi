@@ -1,29 +1,201 @@
-import Header from '@/components/Header/Header';
-import { MAX_WIDTH } from '@/Constants';
+import { SearchHeader } from '@/components/ui/Header';
+import IconButton from '@/components/ui/IconButton';
+import ListEmpty from '@/components/ui/ListEmpty';
+import Pill from '@/components/ui/Pill';
+import Toast from '@/components/ui/Toast';
+import { deviceId } from '@/constants';
 import { fetcher } from '@/services/fetcher';
-import { Theme } from '@/Theme';
-import { Entypo } from '@expo/vector-icons';
+import { getTitle } from '@/services/getTitle';
+import { handleCoverDelete, handleCoverDownload } from '@/services/mangaFunctions';
+import { Theme } from '@/theme';
+import { Manga, MangaAPIResponse } from '@/types/mangas';
+import { SearchAPIResponse } from '@/types/searchs';
+import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useIsFocused } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useRef, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+function ResultElement(item: Manga) {
+    const [isFavorite, setIsFavorite] = useState<boolean>(false);
+    const db = useSQLiteContext();
+    const backend = process.env.EXPO_PUBLIC_KOEYOMI_BACKEND;
+
+    const handleFavoriteButton = async () => {
+        try {
+            setIsFavorite(!isFavorite);
+            Toast({ message: !isFavorite ? 'Added to favorites' : 'Deleted from favorites' });
+            await saveOrDeleteFavorite();
+            if (!isFavorite) {
+                const manga = await fetchMangaInfo();
+                await handleCoverDownload(manga, db);
+            } else {
+                handleCoverDelete(item.id, db);
+            }
+        } catch (error) {
+            Toast({ message: `${error}` });
+            console.log(error);
+        }
+    };
+
+    async function getIfMangaIsFavorite() {
+        try {
+            const favoriteManga = await db.getFirstAsync('SELECT * FROM favorites WHERE manga_id = ?', item.id);
+
+            if (favoriteManga) {
+                setIsFavorite(true);
+            }
+        } catch (error) {
+            Toast({ message: 'Error get if favorite' });
+        }
+    }
+
+    async function saveToDatabase(fetchData: MangaAPIResponse) {
+        let savedData;
+        const mangaData = fetchData.data as Manga;
+        await db.runAsync('INSERT OR REPLACE INTO mangas (id, type, attributes, relationships, coverImageUrl) VALUES (?, ?, ?, ?, ?)', [
+            item.id,
+            mangaData.type,
+            JSON.stringify(mangaData.attributes),
+            JSON.stringify(mangaData.relationships),
+            mangaData.coverImageUrl,
+        ]);
+
+        savedData = (await db.getFirstAsync('SELECT * FROM mangas WHERE id = ?', item.id)) as Manga;
+
+        if (savedData) {
+            savedData.attributes = JSON.parse(savedData.attributes.toString());
+            savedData.relationships = JSON.parse(savedData.relationships.toString());
+        }
+
+        return savedData;
+    }
+
+    async function fetchMangaInfo() {
+        try {
+            if (!backend) throw new Error('Backend URL not defined');
+
+            const response = (await fetcher(backend, `/mangadex/manga/${item.id}`)) as MangaAPIResponse;
+
+            const resultData = (await saveToDatabase(response)) as Manga;
+
+            return resultData;
+        } catch (error) {
+            Toast({ message: `${error}` });
+        }
+    }
+
+    async function saveOrDeleteFavorite() {
+        if (isFavorite) {
+            await db.runAsync('DELETE FROM favorites WHERE manga_id = ?', item.id);
+        } else {
+            await db.runAsync('INSERT INTO favorites (user_id, manga_id, timestamp) VALUES (?, ?, ?)', [deviceId, item.id, `${Date.now()}`]);
+        }
+    }
+
+    useEffect(() => {
+        const loadData = async () => {
+            await getIfMangaIsFavorite();
+        };
+
+        loadData();
+    }, []);
+
+    return (
+        <View style={styles.mangaItemWrapper}>
+            <View style={styles.mangaItemContainer}>
+                <View style={styles.mangaItemImage}>
+                    <Image
+                        cachePolicy={'memory'}
+                        placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
+                        transition={200}
+                        source={item.coverImageUrl}
+                        style={{ width: '100%', height: '100%' }}
+                        contentFit='cover'
+                    />
+                </View>
+                <View style={styles.mangaItemInfo}>
+                    <View style={[styles.mangaItemInfoLeft]}>
+                        <Pill
+                            IconElement={
+                                <MaterialCommunityIcons
+                                    name='record'
+                                    size={15}
+                                    color={item.attributes.status === 'ongoing' ? Theme.colors.vermillion : Theme.colors.midGray}
+                                />
+                            }
+                            containerStyle={{
+                                width: '100%',
+                                backgroundColor: Theme.colors.jetgray,
+
+                                flexDirection: 'row',
+                                gap: 10,
+                            }}
+                            textStyle={{
+                                color: item.attributes.status === 'ongoing' ? Theme.colors.vermillion : Theme.colors.midGray,
+                            }}
+                            text={item.attributes.status.toUpperCase() || 'UNKNOWN'}
+                        />
+                        <Text
+                            numberOfLines={3}
+                            ellipsizeMode='tail'
+                            style={styles.titleText}>
+                            {getTitle(item.attributes)}
+                        </Text>
+                        <View style={{ flexDirection: 'row', gap: 10 }}>
+                            {item.attributes.publicationDemographic && (
+                                <Pill
+                                    containerStyle={{ backgroundColor: Theme.colors.jetgray }}
+                                    text={item.attributes.publicationDemographic.toUpperCase()}
+                                />
+                            )}
+                            {item.attributes.year && (
+                                <Pill
+                                    containerStyle={{ backgroundColor: Theme.colors.jetgray }}
+                                    text={item.attributes.year}
+                                />
+                            )}
+                        </View>
+                    </View>
+                    <View style={styles.mangaItemInfoRight}>
+                        <IconButton
+                            IconSet={Ionicons}
+                            iconName={isFavorite ? 'heart' : 'heart-outline'}
+                            iconColor={isFavorite ? Theme.colors.vermillion : Theme.colors.midGray}
+                            onPress={handleFavoriteButton}
+                            containerStyle={{ borderWidth: 2, borderColor: isFavorite ? Theme.colors.vermillion : Theme.colors.midGray }}
+                        />
+                    </View>
+                </View>
+            </View>
+        </View>
+    );
+}
 
 export default function SearchScreen() {
-
-    const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
-    const [searchTitle, setSearchTitle] = useState('');
-    const [searchResults, setSearchResults] = useState<object>();
-    const flatListRef = useRef(null);
-    const router = useRouter();
+    const [isSearchBarVisible, setIsSearchBarVisible] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [searchTitle, setSearchTitle] = useState<string>('');
+    const [searchResults, setSearchResults] = useState<SearchAPIResponse>();
+    const flatListRef = useRef<FlatList<Manga>>(null);
+    const backend = process.env.EXPO_PUBLIC_KOEYOMI_BACKEND;
+    const insets = useSafeAreaInsets();
+    const isFocused = useIsFocused();
 
     const handleSearch = async () => {
         if (searchTitle.trim().length > 0) {
+            setLoading(true);
+            setSearchResults(undefined);
             try {
-                const response = await fetcher(process.env.EXPO_PUBLIC_KOEYOMI_BACKEND, `/mangadex/search?title=${encodeURIComponent(searchTitle)}`) as object;
+                if (!backend) throw new Error('Backend URL not defined');
+                const response = (await fetcher(backend, `/mangadex/search?title=${encodeURIComponent(searchTitle)}`)) as SearchAPIResponse;
                 setSearchResults(response);
+                setLoading(false);
             } catch (error) {
-                console.log('Error searching:', error)
+                Toast({ message: `${error}` });
+                setLoading(false);
             }
         }
     };
@@ -33,149 +205,100 @@ export default function SearchScreen() {
             setIsSearchBarVisible(false);
             return true;
         }
-        return false
-    }
+        return false;
+    };
 
     const handleCloseSearchBar = () => {
         setSearchTitle('');
-    }
+    };
 
     const handleChangeText = (text: string) => {
         setSearchTitle(text);
-    }
-
-    // router.addListener('blur', handleBackPress)
+    };
 
     useEffect(() => {
-        if (flatListRef.current && searchResults.data.length > 0) {
-            flatListRef.current.scrollToOffset({ animeted: true, offset: 0 })
+        if (flatListRef.current && searchResults && searchResults.data.length > 0) {
+            flatListRef.current.scrollToOffset({ animated: true, offset: 0 });
         }
-    }, [searchResults])
+    }, [searchResults]);
 
+    if (!isFocused) {
+        return null;
+    }
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.SearchContainer}>
-                <Header
-                    isSearchBarVisible={isSearchBarVisible}
-                    setIsSearchBarVisible={setIsSearchBarVisible}
-                    title={'Search'}
-                    isFilterSearch={false}
-                    inputValue={searchTitle}
-                    handleSearch={handleSearch}
-                    handleClose={handleCloseSearchBar}
-                    handleChangeText={handleChangeText} />
-                {searchResults &&
-                    <FlatList
-                        data={searchResults.data}
-                        ref={flatListRef}
-                        keyExtractor={(item) => item.id}
-                        showsVerticalScrollIndicator={false}
-                        style={{ flexGrow: 1 }}
-                        contentContainerStyle={styles.mangaListContainer}
-                        initialNumToRender={6}
-                        maxToRenderPerBatch={12}
-                        windowSize={10}
-                        removeClippedSubviews={true}
-                        renderItem={({ item }) => {
-                            return (
-                                // <View>
-                                //     <Image placeholder={{ blurhash }} transition={500} source={item.coverImageUrl} style={{ width: 100, height: 200, marginLeft: 10 }} contentFit='cover'></Image>
-                                //     <Text>{item.attributes.title.en}</Text>
-                                // </View>
-                                <View style={styles.mangaItemWrapper}>
-                                    <TouchableNativeFeedback
-                                        background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
-                                        useForeground={true}
-                                        onPress={() => {
-                                            router.navigate({
-                                                pathname: '/(home)/manga',
-                                                params: { id: item.id }
-                                            })
-                                        }}
-                                    >
-                                        <View style={styles.mangaItemContainer}>
-                                            <View style={styles.mangaItemImage}>
-                                                <Image
-                                                    placeholder={{ blurhash: 'KLEv+{so1z$Oo1S41#Wq|t' }}
-                                                    transition={200}
-                                                    source={item.coverImageUrl}
-                                                    style={{ width: '100%', height: '100%' }}
-                                                    contentFit='cover'
-                                                />
-                                            </View>
-                                            <View style={styles.mangaItemInfo}>{/*Aqui modificar el width cuando la pantalla gira a modo horizontal */}
-                                                <View style={styles.mangaItemInfoHeader}>
-                                                    <View style={styles.title}>
-                                                        <Text
-                                                            numberOfLines={1}
-                                                            ellipsizeMode='tail'
-                                                            style={styles.titleText}>
-                                                            {item.attributes.title.ja !== "" ? item.attributes.title.ja : (item.attributes.title["ja-ro"] ? item.attributes.title["ja-ro"] : (item.attributes.title.en ? item.attributes.title.en : item.attributes.title["zh-ro"]))}
-                                                        </Text>
-                                                    </View>
-                                                    <View style={styles.status}>
-                                                        <Entypo
-                                                            name="controller-record"
-                                                            size={12}
-                                                            color={item.attributes.status === 'completed' ? Theme.colors.midGray : Theme.colors.vermillion} />
-                                                        <Text
-                                                            ellipsizeMode='tail'
-                                                            style={[styles.statusText, item.attributes.status === 'completed' ? { color: Theme.colors.midGray } : { color: Theme.colors.vermillion }]}>
-                                                            {item.attributes.status === 'ongoing' ? 'En Curso' : 'Finalizado'}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-                                                <View style={styles.mangaItemInfoGenres}>
-                                                    {item.attributes.tags.filter(tag => tag.attributes?.group === 'genre').map((tag) => {
-                                                        return (
-                                                            <View style={styles.genre} key={`${item.id}-genre-${tag.attributes.name.en}`}>
-                                                                <Text numberOfLines={1} style={styles.genreText}>{tag.attributes.name.en}</Text>
-                                                            </View>
-                                                        )
-                                                    })}
-                                                </View>
-                                                <View style={styles.mangaItemDescription}>
-                                                    <Text
-                                                        numberOfLines={6}
-                                                        ellipsizeMode='tail'
-                                                        style={styles.descriptionText}>
-                                                        {item.attributes.description['es-la'] ?
-                                                            item.attributes.description['es-la'] :
-                                                            item.attributes.description['en']}
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableNativeFeedback>
-                                </View>
-
-                            )
-                        }}
-                    />}
-            </SafeAreaView>
-        </SafeAreaProvider>
+        <View style={[styles.SearchContainer, { paddingTop: insets.top }]}>
+            <SearchHeader
+                isSearchBarVisible={isSearchBarVisible}
+                setIsSearchBarVisible={setIsSearchBarVisible}
+                title={'Search'}
+                hasSearchFilter={false}
+                inputValue={searchTitle}
+                handleSearch={handleSearch}
+                handleClose={handleCloseSearchBar}
+                handleChangeText={handleChangeText}
+            />
+            {searchResults ? (
+                <FlatList
+                    data={searchResults.data}
+                    ref={flatListRef}
+                    keyExtractor={(item) => item.id}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={[styles.mangaListContainer, { paddingBottom: insets.bottom }]}
+                    initialNumToRender={6}
+                    maxToRenderPerBatch={12}
+                    windowSize={10}
+                    removeClippedSubviews={true}
+                    ListEmptyComponent={
+                        <ListEmpty
+                            description="We couldn't find any manga matching your search. Try using different keywords."
+                            IconSet={MaterialIcons}
+                            iconName='search-off'
+                        />
+                    }
+                    renderItem={({ item }) => {
+                        return <ResultElement {...item} />;
+                    }}
+                />
+            ) : loading ? (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'flex-start', padding: 20, gap: 10 }}>
+                    <ActivityIndicator
+                        size={'large'}
+                        color={Theme.colors.midGray}
+                    />
+                    <Text style={{ width: '70%', textAlign: 'center', fontSize: Theme.fonts.paragraph, color: Theme.colors.midGray }}>
+                        Searching for your next story... please wait a moment.
+                    </Text>
+                </View>
+            ) : (
+                <ListEmpty
+                    description='Search by title to discover new stories.'
+                    IconSet={MaterialCommunityIcons}
+                    iconName='file-find-outline'
+                />
+            )}
+        </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     SearchContainer: {
         height: '100%',
     },
     mangaListContainer: {
-        padding: 10,
+        padding: 20,
 
-        gap: 10
+        gap: 20,
     },
     mangaItemWrapper: {
         borderRadius: Theme.borders.cardItem,
 
-        overflow: 'hidden'
+        overflow: 'hidden',
     },
     mangaItemContainer: {
         flex: 1,
         height: 200,
-        backgroundColor: Theme.colors.jetgray,
+        backgroundColor: Theme.colors.gunmetalGray,
 
         flexDirection: 'row',
         alignItems: 'flex-start',
@@ -186,74 +309,29 @@ const styles = StyleSheet.create({
         height: 200,
     },
     mangaItemInfo: {
-        width: MAX_WIDTH - 150,
-        padding: 10,
+        height: 200,
+        padding: 20,
 
-        gap: 5,
-        overflow: 'hidden'
-    },
-    mangaItemInfoHeader: {
-        position: 'relative',
-        minWidth: '100%',
-
-        display: 'flex',
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 10,
+        overflow: 'hidden',
     },
-    title: {
-        width: '60%',
+    mangaItemInfoLeft: {
+        flex: 2,
+        height: '100%',
+        justifyContent: 'space-between',
+    },
+    mangaItemInfoRight: {
+        flex: 1,
+        height: '100%',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
     },
     titleText: {
         fontSize: Theme.fonts.subtitle,
-        color: Theme.colors.lightGray
+        fontWeight: 'bold',
+        color: Theme.colors.lightGray,
     },
-    status: {
-        position: 'absolute',
-        right: 0,
-        width: 'auto',
-        maxWidth: '40%',
-        backgroundColor: Theme.colors.gunmetalGray,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 5,
-
-        borderRadius: 20,
-    },
-    statusText: {
-        fontSize: Theme.fonts.tiny,
-        textTransform: 'capitalize',
-    },
-    mangaItemInfoGenres: {
-        marginTop: 10,
-        padding: 0,
-
-        flexDirection: 'row',
-        gap: 5,
-        flexWrap: 'wrap',
-    },
-    genre: {
-        backgroundColor: Theme.colors.gunmetalGray,
-        paddingVertical: 2,
-        paddingHorizontal: 7,
-
-        borderRadius: 20
-    },
-    genreText: {
-        fontSize: Theme.fonts.tiny,
-        color: Theme.colors.midGray,
-    },
-    mangaItemDescription: {
-        width: '100%',
-    },
-    descriptionText: {
-        fontSize: Theme.fonts.paragraph,
-        color: Theme.colors.midGray,
-    }
-})
+});
