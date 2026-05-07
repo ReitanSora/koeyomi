@@ -1,16 +1,17 @@
 import { StaticHeader } from '@/components/ui/Header';
 import IconButton from '@/components/ui/IconButton';
 import Toast from '@/components/ui/Toast';
+import { MAX_WIDTH } from '@/constants';
 import { Theme } from '@/theme';
 import { Chapters } from '@/types/chapters';
-import { Box, Column, Host, ModalBottomSheet, ModalBottomSheetRef, RNHostView } from '@expo/ui/jetpack-compose';
-import { background, clip, fillMaxWidth, height, padding, Shapes, width } from '@expo/ui/jetpack-compose/modifiers';
+import { Box, Column, FilledTonalButton, Host, ModalBottomSheet, ModalBottomSheetRef, RNHostView, Row, Shape, Text } from '@expo/ui/jetpack-compose';
+import { background, clip, fillMaxWidth, height, offset, padding, Shapes, width } from '@expo/ui/jetpack-compose/modifiers';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Directory, Paths } from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Text as RNText, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface FileSystemChapters extends Chapters {
@@ -89,37 +90,46 @@ function BottomSheetConfirmation({ handleAction, itemCount }: BottomSheetProps) 
                             <Box modifiers={[width(60), height(6), clip(Shapes.Circle), background(Theme.colors.midGray)]} />
                         </Column>
                     </ModalBottomSheet.DragHandle>
-                    <Column modifiers={[height(250)]}>
+                    <Column modifiers={[height(150)]}>
                         <RNHostView>
                             <View style={bottomSheetStyle.container}>
                                 <View style={bottomSheetStyle.section}>
-                                    <Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle]}>Delete Items</Text>
-                                    <Text style={[bottomSheetStyle.text]}>Are you sure you want to delete {itemCount} items?</Text>
-                                </View>
-                                <View style={bottomSheetStyle.actionButtons}>
-                                    <IconButton
-                                        onPress={() => setVisible(!visible)}
-                                        containerStyle={{
-                                            flex: 1,
-                                        }}
-                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle, {color: Theme.colors.midGray}]}>Cancel</Text>}
-                                    />
-                                    <IconButton
-                                        onPress={() => {
-                                            handleAction();
-                                            setVisible(!visible);
-                                        }}
-                                        containerStyle={{
-                                            backgroundColor: Theme.colors.vermillion,
-                                            flex: 1,
-                                            borderWidth: 2,
-                                            borderColor: Theme.colors.vermillion,
-                                        }}
-                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle, {color:Theme.colors.gunmetalGray}]}>Delete</Text>}
-                                    />
+                                    <RNText style={[bottomSheetStyle.text, bottomSheetStyle.subtitle]}>Delete Items</RNText>
+                                    <RNText style={[bottomSheetStyle.text]}>Are you sure you want to delete {itemCount} items?</RNText>
                                 </View>
                             </View>
                         </RNHostView>
+                    </Column>
+                    <Column modifiers={[fillMaxWidth(), height(48), padding(20, 0, 20, 0), offset(0, -10)]}>
+                        <Row
+                            horizontalArrangement='spaceBetween'
+                            modifiers={[fillMaxWidth()]}>
+                            <FilledTonalButton
+                                onClick={() => setVisible(!visible)}
+                                modifiers={[width(~~MAX_WIDTH / 2 - 30), height(48)]}
+                                colors={{ containerColor: Theme.colors.gunmetalGray }}
+                                shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                <Text
+                                    style={{ fontSize: Theme.fonts.subtitle, fontWeight: 'bold' }}
+                                    color={Theme.colors.midGray}>
+                                    Cancel
+                                </Text>
+                            </FilledTonalButton>
+                            <FilledTonalButton
+                                onClick={() => {
+                                    handleAction();
+                                    setVisible(!visible);
+                                }}
+                                modifiers={[width(~~MAX_WIDTH / 2 - 30), height(48)]}
+                                colors={{ containerColor: Theme.colors.vermillion }}
+                                shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                <Text
+                                    style={{ fontSize: Theme.fonts.subtitle, fontWeight: 'bold' }}
+                                    color={Theme.colors.gunmetalGray}>
+                                    Delete
+                                </Text>
+                            </FilledTonalButton>
+                        </Row>
                     </Column>
                 </ModalBottomSheet>
             )}
@@ -216,12 +226,12 @@ function DownloadedItem({ handleAction, item, selectAll }: DownloadedItem) {
                         )}
                     </View>
                     <View style={itemStyle.info}>
-                        <Text style={itemStyle.text}>Chapter {item.attributes.chapter ?? 'Unknown'}</Text>
-                        <Text style={itemStyle.text}>{item.attributes.pages ?? 'Unknown'} Pages</Text>
-                        <Text style={itemStyle.text}>{item.attributes.translatedLanguage.toUpperCase() ?? 'Unknown Laguange'}</Text>
+                        <RNText style={itemStyle.text}>Chapter {item.attributes.chapter ?? 'Unknown'}</RNText>
+                        <RNText style={itemStyle.text}>{item.attributes.pages ?? 'Unknown'} Pages</RNText>
+                        <RNText style={itemStyle.text}>{item.attributes.translatedLanguage.toUpperCase() ?? 'Unknown Laguange'}</RNText>
                     </View>
                     <View style={itemStyle.sizeInfo}>
-                        <Text style={itemStyle.text}>{getSize(item.size)}</Text>
+                        <RNText style={itemStyle.text}>{getSize(item.size)}</RNText>
                     </View>
                 </>
             }
