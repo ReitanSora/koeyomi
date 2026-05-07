@@ -102,7 +102,7 @@ function BottomSheetConfirmation({ handleAction, itemCount }: BottomSheetProps) 
                                         containerStyle={{
                                             flex: 1,
                                         }}
-                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle]}>Cancel</Text>}
+                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle, {color: Theme.colors.midGray}]}>Cancel</Text>}
                                     />
                                     <IconButton
                                         onPress={() => {
@@ -115,7 +115,7 @@ function BottomSheetConfirmation({ handleAction, itemCount }: BottomSheetProps) 
                                             borderWidth: 2,
                                             borderColor: Theme.colors.vermillion,
                                         }}
-                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle]}>Delete</Text>}
+                                        InsideElement={<Text style={[bottomSheetStyle.text, bottomSheetStyle.subtitle, {color:Theme.colors.gunmetalGray}]}>Delete</Text>}
                                     />
                                 </View>
                             </View>
