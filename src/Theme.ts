@@ -19,9 +19,9 @@ export const Theme = {
         image: 10,
     },
     fonts: {
-        title: 20.5,
-        subtitle: 15,
-        paragraph: 13,
+        title: 24,
+        subtitle: 20,
+        paragraph: 14,
         tiny: 10,
     },
 }
