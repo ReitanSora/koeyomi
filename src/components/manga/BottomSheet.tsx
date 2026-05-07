@@ -70,7 +70,7 @@ export function BottomSheetInfo({ data }: BottomSheetInfoProps) {
                             <Box modifiers={[width(60), height(6), clip(Shapes.Circle), background(Theme.colors.midGray)]} />
                         </Column>
                     </ModalBottomSheet.DragHandle>
-                    <Column modifiers={[height(~~MAX_HEIGHT / 1.5)]}>
+                    <Column modifiers={[height(~~MAX_HEIGHT / 1.25)]}>
                         <RNHostView>
                             <View style={styles.containerInsideModal}>
                                 <Pill
@@ -213,19 +213,13 @@ export function BottomSheetFilter({ children, onReset, heightDivider }: BottomSh
                                     <IconButton
                                         onPress={handleReset}
                                         containerStyle={{ flex: 1 }}
-                                        IconSet={Ionicons}
-                                        iconName='reload-outline'
-                                        iconColor={Theme.colors.lightGray}
                                         insideStyle={{
-                                            borderWidth: 2,
-                                            borderColor: Theme.colors.lightGray,
-                                            borderRadius: 48,
                                             flexDirection: 'row',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             gap: 10,
                                         }}
-                                        InsideElement={<Text style={[styles.subtitle, { color: Theme.colors.lightGray }]}>Reset</Text>}
+                                        InsideElement={<Text style={[styles.subtitle, { color: Theme.colors.midGray }]}>Reset</Text>}
                                     />
                                 </View>
                             </View>
@@ -288,7 +282,7 @@ const styles = StyleSheet.create({
     },
     filterOptions: {
         position: 'absolute',
-        bottom: 20,
+        bottom: 0,
 
         width: '100%',
         // backgroundColor: '#FFF',
