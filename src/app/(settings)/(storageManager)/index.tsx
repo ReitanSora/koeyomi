@@ -9,7 +9,7 @@ import { Directory, Paths } from 'expo-file-system';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface FileSystemItems extends Manga {
@@ -115,9 +115,9 @@ export default function StorageManagerHome() {
                         return (
                             <>
                                 <View style={styles.directoryItem}>
-                                    <TouchableNativeFeedback
-                                        background={TouchableNativeFeedback.Ripple('rgba(139, 139, 139, 0.25)', false)}
-                                        useForeground={true}
+                                    <Pressable
+                                        android_ripple={{ color: 'rgba(139, 139, 139, 0.25)', borderless: false, foreground: true }}
+                                        style={{ flex: 1 }}
                                         onPress={() => router.navigate({ pathname: '/(settings)/(storageManager)/manga/[mangaId]', params: { mangaId: item.id } })}>
                                         <View style={styles.insideItem}>
                                             <View style={styles.left}>
@@ -137,7 +137,7 @@ export default function StorageManagerHome() {
                                                 />
                                             </View>
                                         </View>
-                                    </TouchableNativeFeedback>
+                                    </Pressable>
                                 </View>
                                 <View style={styles.separator} />
                             </>

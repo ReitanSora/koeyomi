@@ -5,20 +5,20 @@ import { Theme } from '@/theme';
 import { ChapterImages, Chapters } from '@/types/chapters';
 import { Ionicons } from '@expo/vector-icons';
 import { Directory, File, Paths } from 'expo-file-system';
+import * as Network from 'expo-network';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, ToastAndroid, TouchableNativeFeedback, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import IconButton from '../ui/IconButton';
-import * as Network from 'expo-network';
 
 interface ChapterItemProps {
     item: Chapters;
     title: string;
 }
 
-export default function ChapterItem({ item,  title }: ChapterItemProps) {
+export default function ChapterItem({ item, title }: ChapterItemProps) {
     const [isDownloading, setIsDownloading] = useState<boolean>(false);
     const [isDownloaded, setIsDownloaded] = useState<boolean>(item.download_status === 'not_downloaded' ? false : true);
     const [alreadySeen, setAlreadySeen] = useState<boolean>(parseInt(item.last_page_read) >= 0);
@@ -36,8 +36,8 @@ export default function ChapterItem({ item,  title }: ChapterItemProps) {
         try {
             const networkData = await Network.getNetworkStateAsync();
 
-            if (networkData.type !== 'WIFI' && dataMode === 'wifi-only'){
-                throw new Error('Connect to a WIFI network or disable data saver setting.')
+            if (networkData.type !== 'WIFI' && dataMode === 'wifi-only') {
+                throw new Error('Connect to a WIFI network or disable data saver setting.');
             }
 
             setIsDownloading(true);
@@ -45,16 +45,16 @@ export default function ChapterItem({ item,  title }: ChapterItemProps) {
             if (!backend) throw new Error('Backend URL not defined');
 
             const images = (await fetcher(backend, `/mangadex/chapter/${item.id}`)) as ChapterImages;
-            const parentDirectory = new Directory(Paths.document.uri, 'downloaded')
-            const mangaDirectory = new Directory(Paths.document.uri, 'downloaded', item.manga_id)
+            const parentDirectory = new Directory(Paths.document.uri, 'downloaded');
+            const mangaDirectory = new Directory(Paths.document.uri, 'downloaded', item.manga_id);
             const downloadDirectory = new Directory(Paths.document.uri, 'downloaded', item.manga_id, item.id);
 
-            if(!parentDirectory.exists) {
-                parentDirectory.create()
+            if (!parentDirectory.exists) {
+                parentDirectory.create();
             }
 
-            if(!mangaDirectory.exists){
-                mangaDirectory.create()
+            if (!mangaDirectory.exists) {
+                mangaDirectory.create();
             }
 
             if (!downloadDirectory.exists) {
@@ -76,7 +76,7 @@ export default function ChapterItem({ item,  title }: ChapterItemProps) {
             await updateChapterInfo(true, downloadDirectory.uri);
         } catch (error) {
             Toast({ message: `${error}` });
-            console.log(error)
+            console.log(error);
             await updateChapterInfo(false, '');
             setIsDownloaded(false);
             setIsDownloading(false);
@@ -116,9 +116,9 @@ export default function ChapterItem({ item,  title }: ChapterItemProps) {
 
     return (
         <View style={styles.container}>
-            <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple('rgba(139, 139, 139, 0.5)', false)}
-                useForeground={true}
+            <Pressable
+                android_ripple={{ color: 'rgba(139, 139, 139, 0.25)', borderless: false, foreground: true }}
+                style={{ flex: 1 }}
                 onPress={() => {
                     router.navigate({
                         pathname: '/(home)/reader',
@@ -182,7 +182,7 @@ export default function ChapterItem({ item,  title }: ChapterItemProps) {
                         />
                     </View>
                 </View>
-            </TouchableNativeFeedback>
+            </Pressable>
         </View>
     );
 }

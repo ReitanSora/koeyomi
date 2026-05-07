@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleProp, StyleSheet, TouchableNativeFeedback, View, ViewStyle } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 interface IconButtonProps {
     onPress: () => void;
@@ -16,10 +16,10 @@ interface IconButtonProps {
 export default function IconButton({ onPress, rippleColor = 'rgba(139, 139, 139, 0.25)', containerStyle, insideStyle, IconSet, iconName, iconSize, iconColor, InsideElement }: IconButtonProps) {
     return (
         <View style={[styles.buttonNormalContainer, containerStyle]}>
-            <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple(rippleColor, false)}
-                useForeground={true}
-                onPress={onPress}>
+            <Pressable
+                onPress={onPress}
+                android_ripple={{ color: rippleColor, borderless: false, foreground: true }}
+                style={{flex: 1}}>
                 <View style={[styles.buttonInside, insideStyle]}>
                     {IconSet && (
                         <IconSet
@@ -30,7 +30,7 @@ export default function IconButton({ onPress, rippleColor = 'rgba(139, 139, 139,
                     )}
                     {InsideElement}
                 </View>
-            </TouchableNativeFeedback>
+            </Pressable>
         </View>
     );
 }

@@ -5,16 +5,16 @@ import { Manga } from '@/types/mangas';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function MangaItem(item: Manga) {
     const router = useRouter();
 
     return (
         <View style={[styles.mangaItemContainer, { height: (MAX_WIDTH / 2) * 1.3 }]}>
-            <TouchableNativeFeedback
-                background={TouchableNativeFeedback.Ripple('rgba(224,224,224,.2)', false)}
-                useForeground={true}
+            <Pressable
+                android_ripple={{ color: 'rgba(139, 139, 139, 0.25)', borderless: false, foreground: true }}
+                style={{ flex: 1 }}
                 onPress={() => {
                     router.navigate({
                         pathname: '/(home)/manga/[mangaId]',
@@ -38,7 +38,7 @@ export default function MangaItem(item: Manga) {
                         </Text>
                     </View>
                 </View>
-            </TouchableNativeFeedback>
+            </Pressable>
         </View>
     );
 }
