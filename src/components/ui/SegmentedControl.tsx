@@ -1,7 +1,9 @@
+import { MAX_WIDTH } from '@/constants';
 import { Theme } from '@/theme';
+import { Column, FilledTonalButton, Host, Row, Shape, Text } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, height, width } from '@expo/ui/jetpack-compose/modifiers';
 import React from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
-import IconButton from './IconButton';
+import { Text as RNText, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 
 interface ContainerProps {
     containerStyle?: StyleProp<ViewStyle>;
@@ -12,7 +14,11 @@ interface ContainerProps {
 
 interface SegmentedControlProps {
     containerProps?: ContainerProps;
-    options: Array<string>;
+    options: Array<{
+        label: string;
+        value: string;
+    }>;
+    widthContainer?: number;
     selectedOption: string | undefined;
     setSelectedOption: (value: any) => void;
     subtitle?: string;
@@ -22,13 +28,13 @@ interface SegmentedControlProps {
 function Container({ containerStyle, InsideElement, subtitle, subtitleStyle }: ContainerProps) {
     return (
         <View style={containerStyle}>
-            {subtitle && <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>}
+            {subtitle && <RNText style={[styles.subtitle, subtitleStyle]}>{subtitle}</RNText>}
             <View style={styles.sectionContent}>{InsideElement}</View>
         </View>
     );
 }
 
-export default function SegmentedControl({ containerProps, options, selectedOption, setSelectedOption, subtitle, textStyle }: SegmentedControlProps) {
+export default function SegmentedControl({ containerProps, options, widthContainer = ~~MAX_WIDTH - 40, selectedOption, setSelectedOption, subtitle, textStyle }: SegmentedControlProps) {
     return (
         <Container
             containerStyle={[containerProps?.containerStyle, { paddingHorizontal: 20, gap: 10 }]}
@@ -36,21 +42,28 @@ export default function SegmentedControl({ containerProps, options, selectedOpti
             subtitleStyle={containerProps?.subtitleStyle}
             InsideElement={
                 <View style={styles.segmentedControl}>
-                    {options.map((option) => (
-                        <IconButton
-                            key={option}
-                            onPress={() => setSelectedOption(option)}
-                            rippleColor='rgba(128, 128, 128, 0.1)'
-                            containerStyle={{ flex: 1 }}
-                            insideStyle={{
-                                backgroundColor: option === selectedOption ? Theme.colors.midGray : 'transparent',
-                                borderRadius: 48,
-                                paddingHorizontal: 20,
-                                justifyContent: 'center',
-                            }}
-                            InsideElement={<Text style={[styles.text, textStyle, { color: option === selectedOption ? Theme.colors.gunmetalGray : Theme.colors.lightGray }]}>{option}</Text>}
-                        />
-                    ))}
+                    <Host matchContents>
+                        <Column modifiers={[width(widthContainer - 10), height(48)]}>
+                            <Row
+                                horizontalArrangement='spaceBetween'
+                                modifiers={[fillMaxWidth()]}>
+                                {options.map((option, index) => (
+                                    <FilledTonalButton
+                                        key={`segmented-control-option-${index}-${option}`}
+                                        onClick={() => setSelectedOption(option.value)}
+                                        modifiers={[width(widthContainer / 2), height(48)]}
+                                        colors={{ containerColor: option.value === selectedOption ? Theme.colors.midGray : 'transparent' }}
+                                        shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                        <Text
+                                            style={{ fontSize: Theme.fonts.paragraph, fontWeight: 'bold' }}
+                                            color={option.value === selectedOption ? Theme.colors.gunmetalGray : Theme.colors.lightGray}>
+                                            {option.label}
+                                        </Text>
+                                    </FilledTonalButton>
+                                ))}
+                            </Row>
+                        </Column>
+                    </Host>
                 </View>
             }
         />

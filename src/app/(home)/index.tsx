@@ -22,13 +22,22 @@ export default function HomeScreen() {
     const [isSearchBarVisible, setIsSearchBarVisible] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
-    const sortOptions = ['A-Z', 'Z-A'];
-    const [sortSelectedOption, setSortSelectedOption] = useState<string>(sortOptions[0]);
+    const sortOptions = [
+        {
+            label: 'A-Z',
+            value: 'A-Z',
+        },
+        {
+            label: 'Z-A',
+            value: 'Z-A',
+        },
+    ];
+    const [sortSelectedOption, setSortSelectedOption] = useState<string>(sortOptions[0].value);
     const db = useSQLiteContext();
     const insets = useSafeAreaInsets();
 
     const handleReset = () => {
-        setSortSelectedOption(sortOptions[0]);
+        setSortSelectedOption(sortOptions[0].value);
     };
 
     const formatData = (data: object[], columns: number) => {
@@ -132,7 +141,7 @@ export default function HomeScreen() {
                 handleClose={handleCloseSearchBar}>
                 <BottomSheetFilter
                     onReset={handleReset}
-                    heightDivider={3}>
+                    heightDivider={4}>
                     <SegmentedControl
                         options={sortOptions}
                         selectedOption={sortSelectedOption}

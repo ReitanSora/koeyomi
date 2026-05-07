@@ -2,6 +2,7 @@ import Dropdown from '@/components/ui/Dropdown';
 import { StaticHeader } from '@/components/ui/Header';
 import SegmentedControl from '@/components/ui/SegmentedControl';
 import ToggleSwitch from '@/components/ui/Toggle';
+import { MAX_WIDTH } from '@/constants';
 import { useSettings } from '@/context/appContext';
 import { Theme } from '@/theme';
 import { useRouter } from 'expo-router';
@@ -167,7 +168,11 @@ export default function Preferences() {
                         </View>
                         <View style={styles.option}>
                             <SegmentedControl
-                                options={['horizontal', 'vertical']}
+                                options={[
+                                    { label: 'Horizontal', value: 'horizontal' },
+                                    { label: 'Vertical', value: 'vertical' },
+                                ]}
+                                widthContainer={~~MAX_WIDTH - 80}
                                 selectedOption={selectedReadMode}
                                 setSelectedOption={setSelectedReadMode}></SegmentedControl>
                         </View>

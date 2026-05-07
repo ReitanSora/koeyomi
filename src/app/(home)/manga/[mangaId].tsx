@@ -28,7 +28,7 @@ export default function MangaDetailsScreen() {
     const [manga, setManga] = useState<Manga>();
     const [title, setTitle] = useState<string>('');
     const [chapters, setChapters] = useState<Chapters[]>();
-    const [availableLanguages, setAvailableLanguages] = useState<string[]>([]);
+    const [availableLanguages, setAvailableLanguages] = useState<Array<{ label: string; value: string }>>([]);
     const [isFavorite, setIsFavorite] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -38,7 +38,10 @@ export default function MangaDetailsScreen() {
     const [sortSelectedOption, setSortSelectedOption] = useState<string>('Newest');
     const [statusSelectedOption, setStatusSelectedOption] = useState<string[]>(['Read', 'Unread', 'Saved']);
     const [languageSelectedOption, setLanguageSelectedOption] = useState<string>(defaultLanguage);
-    const sortOptions = ['Newest', 'Oldest'];
+    const sortOptions = [
+        { label: 'Newest', value: 'Newest' },
+        { label: 'Oldest', value: 'Oldest' },
+    ];
     const statusOptions = ['Read', 'Unread', 'Saved'];
     const isHeaderVisible = useSharedValue<number>(1);
     const { mangaId } = useLocalSearchParams<{ mangaId: string }>();
@@ -80,7 +83,7 @@ export default function MangaDetailsScreen() {
     };
 
     const handleReset = () => {
-        setSortSelectedOption(sortOptions[0]);
+        setSortSelectedOption(sortOptions[0].value);
         setStatusSelectedOption(statusOptions);
         setLanguageSelectedOption(defaultLanguage);
     };
@@ -355,7 +358,14 @@ export default function MangaDetailsScreen() {
     useEffect(() => {
         if (!manga) return;
 
-        setAvailableLanguages(manga.attributes.availableTranslatedLanguages.filter((item) => item === 'es-la' || item === 'en'));
+        const tempLanguages = manga.attributes.availableTranslatedLanguages.filter((item) => item === 'es-la' || item === 'en');
+        for (const language of tempLanguages) {
+            if (language === 'es-la') {
+                setAvailableLanguages((prev) => [...prev, { label: 'Español', value: language }]);
+            } else {
+                setAvailableLanguages((prev) => [...prev, { label: 'English', value: language }]);
+            }
+        }
 
         setTitle(getTitle(manga.attributes));
     }, [manga]);
@@ -381,9 +391,9 @@ export default function MangaDetailsScreen() {
                 titleStyle={textStyle}
                 onLeftActionPress={() => router.back()}>
                 <BottomSheetFilter
-                    heightDivider={1.6}
+                    heightDivider={1.75}
                     onReset={handleReset}>
-                        <SegmentedControl
+                    <SegmentedControl
                         options={availableLanguages}
                         selectedOption={languageSelectedOption}
                         setSelectedOption={setLanguageSelectedOption}
