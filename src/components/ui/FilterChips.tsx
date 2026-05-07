@@ -1,8 +1,9 @@
+import { MAX_WIDTH } from '@/constants';
 import { Theme } from '@/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { Column, FilledTonalButton, Host, Icon, Row, Shape, Text } from '@expo/ui/jetpack-compose';
+import { fillMaxWidth, height, width } from '@expo/ui/jetpack-compose/modifiers';
 import React from 'react';
-import { StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
-import IconButton from './IconButton';
+import { Text as RNText, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
 
 interface ContainerProps {
     containerStyle?: StyleProp<ViewStyle>;
@@ -17,18 +18,19 @@ interface FilterChipsProps {
     selectedOptions: Array<string>;
     setSelectedOptions: (value: Array<string>) => void;
     subtitle: string;
+    widthContainer?: number;
 }
 
 function Container({ containerStyle, InsideElement, subtitle, subtitleStyle }: ContainerProps) {
     return (
         <View style={containerStyle}>
-            <Text style={[styles.subtitle, subtitleStyle]}>{subtitle}</Text>
+            <RNText style={[styles.subtitle, subtitleStyle]}>{subtitle}</RNText>
             <View style={styles.sectionContent}>{InsideElement}</View>
         </View>
     );
 }
 
-export default function FilterChips({ containerProps, options, selectedOptions, setSelectedOptions, subtitle }: FilterChipsProps) {
+export default function FilterChips({ containerProps, options, selectedOptions, setSelectedOptions, subtitle, widthContainer = ~~MAX_WIDTH - 40 }: FilterChipsProps) {
     const handleSelect = (item: string) => {
         if (selectedOptions.find((option) => option === item)) {
             const tempSelectedOptions = selectedOptions.filter((option) => option !== item);
@@ -45,36 +47,41 @@ export default function FilterChips({ containerProps, options, selectedOptions, 
             subtitleStyle={containerProps?.subtitleStyle}
             InsideElement={
                 <View style={styles.filterChips}>
-                    {options.map((option) => (
-                        <IconButton
-                            key={option}
-                            onPress={() => handleSelect(option)}
-                            rippleColor='rgba(128, 128, 128, 0.0)'
-                            containerStyle={{ flex: 1 }}
-                            IconSet={selectedOptions.includes(option) ? Ionicons : undefined}
-                            iconName='checkmark'
-                            iconColor={Theme.colors.gunmetalGray}
-                            insideStyle={{
-                                backgroundColor: selectedOptions.find((item) => item === option) ? Theme.colors.midGray : Theme.colors.jetgray,
-                                borderRadius: 48,
-                                // borderWidth: !selectedOptions.find(item => item === option) ? 2 : 0,
-                                // borderColor: Theme.colors.jetgray,
-                                justifyContent: 'center',
-                                gap: 10,
-                            }}
-                            InsideElement={
-                                <Text
-                                    style={[
-                                        styles.text,
-                                        {
-                                            color: selectedOptions.includes(option) ? Theme.colors.gunmetalGray : Theme.colors.lightGray,
-                                        },
-                                    ]}>
-                                    {option}
-                                </Text>
-                            }
-                        />
-                    ))}
+                    <Host matchContents>
+                        <Column modifiers={[width(widthContainer), height(48)]}>
+                            <Row
+                                horizontalArrangement='spaceBetween'
+                                modifiers={[fillMaxWidth()]}>
+                                {options.map((option, index) => (
+                                    <FilledTonalButton
+                                        key={`segmented-control-option-${index}-${option}`}
+                                        onClick={() => handleSelect(option)}
+                                        modifiers={[width(widthContainer / 3 - 5), height(48)]}
+                                        contentPadding={{ start: 0, end: 0 }}
+                                        colors={{ containerColor: selectedOptions.find((item) => item === option) ? Theme.colors.midGray : Theme.colors.jetgray }}
+                                        shape={Shape.RoundedCorner({ cornerRadii: { topStart: 24, topEnd: 24, bottomStart: 24, bottomEnd: 24 } })}>
+                                        <Row
+                                            verticalAlignment='center'
+                                            horizontalAlignment='center'>
+                                            {selectedOptions.includes(option) && (
+                                                <Icon
+                                                    source={require('../../../assets/icons/check.png')}
+                                                    size={24}
+                                                    tint={Theme.colors.gunmetalGray}></Icon>
+                                            )}
+                                            <Text
+                                                maxLines={1}
+                                                softWrap={false}
+                                                style={{ fontSize: Theme.fonts.paragraph, fontWeight: 'bold' }}
+                                                color={selectedOptions.includes(option) ? Theme.colors.gunmetalGray : Theme.colors.lightGray}>
+                                                {option}
+                                            </Text>
+                                        </Row>
+                                    </FilledTonalButton>
+                                ))}
+                            </Row>
+                        </Column>
+                    </Host>
                 </View>
             }
         />
