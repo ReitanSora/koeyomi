@@ -3,7 +3,7 @@
     "name": "Koeyomi",
     "slug": "koeyomi",
     "scheme": "koeyomi",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "ios": {
@@ -45,7 +45,9 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-router"
+      "expo-router",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true
