@@ -1,4 +1,5 @@
-import { Theme } from '@/Theme';
+import { SettingsProvider, useSettings } from '@/context/appContext';
+import { Theme } from '@/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import Constants from 'expo-constants';
@@ -39,6 +40,7 @@ async function initDatabase(db: SQLiteDatabase) {
       CREATE TABLE IF NOT EXISTS favorites(
         user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
         manga_id TEXT REFERENCES mangas(id) ON DELETE CASCADE,
+        timestamp TEXT NOT NULL,
         PRIMARY KEY (user_id, manga_id)
       );
       CREATE TABLE IF NOT EXISTS downloads(
@@ -87,7 +89,8 @@ async function initDatabase(db: SQLiteDatabase) {
 function RootTabs() {
     const segment = useSegments();
     const page = segment[segment.length - 1]
-    const pagesToHideTabBar = ['manga', 'reader']
+    const pagesToHideTabBar = ['[mangaId]', 'reader', 'preferences', '(storageManager)', 'about']
+    const {isLoaded} = useSettings();
 
     const MyTheme = {
         ...DefaultTheme,
@@ -96,6 +99,16 @@ function RootTabs() {
             background: Theme.colors.charcoalBlack
         }
     };
+
+    useEffect(() => {
+        if (isLoaded) {
+            SplashScreen.hideAsync();
+        }
+    }, [isLoaded])
+
+    if (!isLoaded) {
+        return null;
+    }
 
     return (
         <ThemeProvider value={MyTheme}>
@@ -127,30 +140,26 @@ function RootTabs() {
                 <Tabs.Screen
                     name='(home)'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />,
-                        tabBarLabel: 'Home',
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color} />
 
                     }}
                 />
                 <Tabs.Screen
                     name='search'
                     options={{
-                        tabBarIcon: ({ color }) => <Ionicons size={24} name="search" color={color} />,
-                        tabBarLabel: 'Search'
+                        tabBarIcon: ({ color }) => <Ionicons size={24} name="search" color={color} />
                     }}
                 />
                 <Tabs.Screen
                     name='history'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "time" : "time-outline"} size={24} color={color} />,
-                        tabBarLabel: 'History'
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "time" : "time-outline"} size={24} color={color} />
                     }}
                 />
                 <Tabs.Screen
-                    name='settings'
+                    name='(settings)'
                     options={{
-                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />,
-                        tabBarLabel: 'Settings'
+                        tabBarIcon: ({ color, focused }) => <Ionicons name={focused ? "settings" : "settings-outline"} size={24} color={color} />
                     }}
                 />
             </Tabs>
@@ -170,7 +179,9 @@ export default function RootLayout() {
                 databaseName='koeyomi.db'
                 onInit={initDatabase}
                 useSuspense={true}>
-                <RootTabs />
+                <SettingsProvider>
+                    <RootTabs />
+                </SettingsProvider>
             </SQLiteProvider>
         </Suspense>
     )
