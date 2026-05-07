@@ -1,8 +1,10 @@
-import Carousel from '@/components/Carousel/Carousel';
-import HeaderBackButton from '@/components/HeaderBackButton/HeaderBackButton';
-import Toast from '@/components/Toast/Toast';
-import { MAX_HEIGHT, MAX_WIDTH, statusBarHeight } from '@/Constants';
+import Carousel from '@/components/manga/Carousel';
+import { StaticHeader } from '@/components/ui/Header';
+import Toast from '@/components/ui/Toast';
+import { deviceId, MAX_HEIGHT, MAX_WIDTH, statusBarHeight } from '@/constants';
+import { useSettings } from '@/context/appContext';
 import { fetcher } from '@/services/fetcher';
+import { ChapterImages, Chapters } from '@/types/chapters';
 import { Directory } from 'expo-file-system';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -12,17 +14,17 @@ import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated'
 
 export default function MangaReaderScreen() {
 
-    const { id, format, title, chapter, chapterTitle } = useLocalSearchParams();
+    const { id, title, chapter, chapterTitle } = useLocalSearchParams<{ id: string, title: string, chapter: string, chapterTitle: string }>();
     const [imagesUrl, setImagesUrl] = useState<string[]>();
-    const [isMenuVisible, setIsMenuVisible] = useState(false);
+    const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
     const [hasStoredData, setHasStoredData] = useState<boolean>(false);
     const [hash, setHash] = useState<string>('');
     const [downloadDirectory, setDownloadDirectory] = useState<string>('');
-    const subtitle = chapter + (chapterTitle ? ` - ${chapterTitle}`: '');
-
+    const subtitle = chapter + (chapterTitle ? ` - ${chapterTitle}` : '');
+    const backend = process.env.EXPO_PUBLIC_KOEYOMI_BACKEND;
     const db = useSQLiteContext();
-
     const router = useRouter();
+    const {imageQuality} = useSettings();
 
     const headerStyle = useAnimatedStyle(() => {
         return {
@@ -47,8 +49,8 @@ export default function MangaReaderScreen() {
         try {
             const savedImages = await db.getFirstAsync(
                 'SELECT file_path FROM chapters WHERE id = ?',
-                [id]
-            );
+                id
+            ) as Chapters;
 
 
             if (savedImages.file_path) {
@@ -60,15 +62,17 @@ export default function MangaReaderScreen() {
                     setImagesUrl(directoryInfo.info().files);
                 }
             } else {
-                const images = await fetcher(process.env.EXPO_PUBLIC_KOEYOMI_BACKEND, `/mangadex/chapter/${id}`) as object;
-                setImagesUrl(images.chapter.dataSaver);
+                if (!backend) throw new Error('Backend URL not defined')
+
+                const images = await fetcher(backend, `/mangadex/chapter/${id}`) as ChapterImages;
+                setImagesUrl(imageQuality === 'high'? images.chapter.data: images.chapter.dataSaver );
                 setHash(images.chapter.hash);
             }
 
         } catch (error) {
-            Toast({ message: `Error while getting savedImages: ${error}`, duration: ToastAndroid.SHORT });
+            Toast({ message: 'No saved images'});
             router.back();
-            console.log(error);
+            // console.log(error);
         }
     };
 
@@ -91,14 +95,14 @@ export default function MangaReaderScreen() {
                 await db.runAsync(
                     'INSERT INTO records (user_id, chapter_id, timestamp) VALUES (?, ?, ?)',
                     [
-                        'Redmi-2015-2201117TL-13',
+                        deviceId,
                         id,
                         `${Date.now()}`
                     ]
                 );
             }
         } catch (error) {
-            Toast({ message: `Error while saving date: ${error}`, duration: ToastAndroid.SHORT });
+            Toast({ message: `Error saving date: ${error}` });
         }
     }
 
@@ -110,7 +114,7 @@ export default function MangaReaderScreen() {
                     getSavedImages()
                 ])
             } catch (error) {
-                Toast({ message: `Error while loading images: ${error}`, duration: ToastAndroid.SHORT })
+                Toast({ message: `Error loading images: ${error}` })
             }
         }
 
@@ -119,17 +123,16 @@ export default function MangaReaderScreen() {
 
     return (
         <>
-            <StatusBar hidden={!isMenuVisible}/>
+            <StatusBar hidden={!isMenuVisible} />
             <Animated.View style={[headerStyle, { position: 'absolute', width: '100%', height: statusBarHeight, backgroundColor: 'rgba(54, 54, 54, 0.8)', zIndex: 1 }]} />
             <View style={{ flex: 1, }}>
                 <Animated.View style={[styles.header, headerStyle, { top: statusBarHeight }]}>
-                    <HeaderBackButton
+                    <StaticHeader
                         hasFilter={false}
-                        hasDownloadOption={false}
+                        onLeftActionPress={() => router.back()}
                         title={title}
                         subtitle={subtitle}
-                        hidden={true}
-                        background='rgba(54, 54, 54, 0.8)'
+                        containerStyle={{ position: 'absolute', backgroundColor: 'rgba(54, 54, 54, 0.8)', zIndex: 1 }}
                     />
                 </Animated.View>
 
@@ -138,7 +141,6 @@ export default function MangaReaderScreen() {
                         id={id}
                         images={orderSavedImages(imagesUrl)}
                         hash={hash}
-                        format={format}
                         onSingleTap={() => setIsMenuVisible(!isMenuVisible)}
                         menuVisible={isMenuVisible}
                         storedData={hasStoredData}
