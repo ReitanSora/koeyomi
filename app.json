@@ -3,7 +3,7 @@
     "name": "Koeyomi",
     "slug": "koeyomi",
     "scheme": "koeyomi",
-    "version": "0.2.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "ios": {
@@ -19,7 +19,6 @@
         "monochromeImage": "./assets/icons/android-adaptive-icon.png",
         "backgroundColor": "#1E1E1E"
       },
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"],
       "package": "com.reitansora.koeyomi"
     },
     "web": {
