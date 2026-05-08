@@ -269,11 +269,13 @@ export default function SearchScreen() {
                     <Text style={{ width: '70%', textAlign: 'center', fontSize: Theme.fonts.paragraph, color: Theme.colors.midGray }}>Searching for your next story... please wait a moment.</Text>
                 </View>
             ) : (
-                <ListEmpty
-                    description='Search by title to discover new stories.'
-                    IconSet={MaterialCommunityIcons}
-                    iconName='file-find-outline'
-                />
+                <View style={{ padding: 20 }}>
+                    <ListEmpty
+                        description='Search by title to discover new stories.'
+                        IconSet={MaterialCommunityIcons}
+                        iconName='file-find-outline'
+                    />
+                </View>
             )}
         </View>
     );
