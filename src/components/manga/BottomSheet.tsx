@@ -32,7 +32,7 @@ function BottomSheetSection({ containerStyle, InsideElement, subtitle, subtitleS
     return (
         <View style={[{ gap: 10 }, containerStyle]}>
             <RNText style={[styles.subtitle, subtitleStyle]}>{subtitle}</RNText>
-            <RNText style={styles.sectionContent}>{InsideElement}</RNText>
+            <View style={styles.sectionContent}>{InsideElement}</View>
         </View>
     );
 }
