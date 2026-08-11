@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteDatabase, SQLiteProvider } from 'expo-sqlite';
 import React, { Suspense, useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -80,6 +81,7 @@ function RootTabs() {
     const page = segment[segment.length - 1];
     const pagesToHideTabBar = ['[mangaId]', 'reader', 'preferences', '(storageManager)', 'about'];
     const { isLoaded } = useSettings();
+    const insets = useSafeAreaInsets();
 
     const MyTheme = {
         ...DefaultTheme,
@@ -101,7 +103,8 @@ function RootTabs() {
 
     return (
         <ThemeProvider value={MyTheme}>
-            <Tabs
+            <View style={{flex: 1, paddingBottom: insets.bottom, backgroundColor: pagesToHideTabBar.includes(page) ? Theme.colors.charcoalBlack: Theme.colors.gunmetalGray}}>
+                <Tabs
                 screenOptions={{
                     tabBarStyle: {
                         display: pagesToHideTabBar.includes(page) ? 'none' : 'flex',
@@ -174,6 +177,7 @@ function RootTabs() {
                     }}
                 />
             </Tabs>
+            </View>
         </ThemeProvider>
     );
 }
